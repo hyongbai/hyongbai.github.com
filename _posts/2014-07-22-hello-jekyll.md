@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "博客迁移到 Jekyll @ GitHub"
+title: "Hello World @ GitHub"
 description: "第一篇博客"
 category: 日志
 tags: [GitHub]
