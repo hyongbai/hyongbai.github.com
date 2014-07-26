@@ -55,7 +55,20 @@ h2{font-family:"Cuprum","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-siz
 h3{font-family:"Cuprum","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:1.2em;color:#222;}
 h4{font-family:"Cuprum","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:1em;color:#333;}
 pre,code{font-family:Menlo,"Andale Mono",Consolas,"Courier New",Monaco,monospace;font-size:13px;}
-code{background-color:#D0D0D0;}
+code{background-color:#f0f0f0;}
+pre {
+    border: 1px solid #ccc;
+    font-family: Bitstream Vera Sans Mono,monospace;
+    padding:15px;
+    background-color: #f0f0f0;
+    -webkit-border-radius: 2px;
+    -khtml-border-radius: 2px;  
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+}
+
+pre code{background-color:transparent;}
+
 embed,object,iframe{display:block;margin:4px auto;}
 .gist{font-size: 12px;line-height:1.6;}
 

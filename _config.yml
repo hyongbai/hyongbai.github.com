@@ -9,7 +9,6 @@ duoshuo: hyongbai
 baidu: 3234957
 weibo: 1854281601
 github: hyongbai
-pygments: true
 safe: true
 paginate: 20
 about: "Hello World! Why so serious"
