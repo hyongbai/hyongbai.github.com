@@ -3,7 +3,10 @@ layout: post
 title: "Android自动打包 友盟多渠道"
 description: "Android 打包 友盟多渠道"
 category: 日志
-tags: [Android]
+tags:
+- Android
+- Shell
+
 date: 2014-07-26 12:57:57+00:00
 ---
 
