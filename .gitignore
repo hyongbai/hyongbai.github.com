@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 _site/
 *.swp
 
-=======
 _site/*
 _theme_packages/*
 
@@ -13,4 +11,3 @@ Thumbs.db
 
 .rbenv-version
 .rvmrc
->>>>>>> f422e8c7aa908c1901e8da0733beccc2ad2ec7e0
