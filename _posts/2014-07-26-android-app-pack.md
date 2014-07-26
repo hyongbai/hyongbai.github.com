@@ -13,7 +13,7 @@ android-app-pack
 
 auto pack android app through ant
 
-[项目地址]  (https://github.com/hyongbai/android-app-pack)
+[项目地址] (https://github.com/hyongbai/android-app-pack)
 
 1.用法：
 
