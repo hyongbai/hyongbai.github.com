@@ -6,6 +6,7 @@ category: 日志
 tags: [GitHub]
 date: 2014-07-22 23:05:57+00:00
 ---
+
 Hello World. Why so serious
 
 {% highlight java linenos %}
