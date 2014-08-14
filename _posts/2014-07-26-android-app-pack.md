@@ -16,7 +16,7 @@ android-app-pack
 
 auto pack android app through ant
 
-[项目地址](https://github.com/hyongbai/android-app-pack)
+[项目地址](http://t.cn/RPl6QW5)
 
 1.用法：
 
@@ -68,5 +68,5 @@ auto pack android app through ant
     作为一个Android开发者，你最好配一个Nexus手机，然后，刷CM的rom。如果你不知道怎么刷机，，，，俺也没办法了。Google之。
 
 注：
-    custom_build.xml参考了 [AntDemo](https://github.com/sinkcup/AntDemo) 在此表示感谢
+    custom_build.xml参考了 [AntDemo](http://t.cn/RPl6Hhi) 在此表示感谢
  
