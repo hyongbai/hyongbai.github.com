@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Hello World @ GitHub"
+title: "shorten url "
 description: "第一篇博客"
 category: 日志
-tags: [GitHub]
-date: 2014-07-22 23:05:57+00:00
+tags: [Shell]
+date: 2014-08-16 21:32:57+00:00
 ---
 
 [项目地址](http://t.cn/RPTSmA6)
