@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android自动打包 友盟多渠道"
+title: "OSX 安装JAVA"
 description: "osx java "
 category: 日志
 tags:
