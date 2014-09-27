@@ -6,15 +6,19 @@ comments: no
 
 {{ site.about }}
 
+
+基于 [NanLing](http://alensw.com/), Thx
+
+
 ----
 
 ###联系方式：        
 
-网站：[{{ site.url }}]({{ site.url }})
+网站:		[{{ site.url }}]({{ site.url }})
 
-邮箱：[{{ site.email }}](mailto:{{ site.email }})
+邮箱:		[{{ site.email }}](mailto:{{ site.email }})
 
-GitHub : [http://github.com/{{ site.github }}](http://github.com/{{ site.github }})
+GitHub :	[http://github.com/{{ site.github }}](http://github.com/{{ site.github }})
 
 ----
 
