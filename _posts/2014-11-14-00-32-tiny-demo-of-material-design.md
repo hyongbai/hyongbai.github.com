@@ -17,7 +17,7 @@ tiny-demo-of-material-design
 看到Google play还有快图的新版之后，感觉左上角的那个Drawer图标很是漂亮。于是就自己实现了一下。滑动DrawerLayout的时候，右上角的小图标会跟随滑动来改变自身的形状。效果图如下，感觉还是挺漂亮的。
 
 
-源码：[`github`](http://yourbay.me)
+源码：[`github`](https://github.com/hyongbai/tiny-demo-of-material-design)
 
 
 
