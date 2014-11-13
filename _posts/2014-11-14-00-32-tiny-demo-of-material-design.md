@@ -17,6 +17,10 @@ tiny-demo-of-material-design
 看到Google play还有快图的新版之后，感觉左上角的那个Drawer图标很是漂亮。于是就自己实现了一下。滑动DrawerLayout的时候，右上角的小图标会跟随滑动来改变自身的形状。效果图如下，感觉还是挺漂亮的。
 
 
+源码：[`github`](http://yourbay.me)
+
+
+
 ![Image](https://raw.githubusercontent.com/hyongbai/tiny-demo-of-material-design/master/ascreenshot-20141114-000506.png)
 
 #### `Dependency` 
@@ -41,7 +45,3 @@ Android的V7包里面使用了Toolbar来代替掉之前的ActionBar了，就可�
 
 第一个colorPrimary即是Toolbar的背景颜色。第二个colorPrimaryDark即是StatusBar的背景色。将两个色值设置成同一个颜色即可以达到所谓的沉寂式体验了。跟iOS的也就无差别了。
 
-
-
-
-[`我的博客`](http://yourbay.me)
