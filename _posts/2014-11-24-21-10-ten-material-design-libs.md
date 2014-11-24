@@ -50,7 +50,7 @@ MaterialList是一个能够帮助所有Android开发者获取谷歌UI设计规�
 
 Floating Action Button（FAB）是众多专家大牛针对Material Design讨论比较细化的一个点，通过圆形元素与分割线、卡片、各种Bar的直线形成鲜明对比，并使用色彩设定中鲜艳的辅色，带来更具突破性的视觉效果。也正因如此，在Github上，有着许多与FAB相关的开源项目，基于Material Design规范的开源Android浮动Action Button控件android-floating-action-button便是其中之一。  
 
-   ![image](http://cms.csdnimg.cn/article/201411/21/546efe7e3a855_middle.jpg?_=33895)![image](http://cms.csdnimg.cn/article/201411/21/546efe84a5da6.jpg)
+ || ![image](http://cms.csdnimg.cn/article/201411/21/546efe7e3a855_middle.jpg?_=33895) || ![image](http://cms.csdnimg.cn/article/201411/21/546efe84a5da6.jpg)
 
 其主要特性如下：
 
@@ -75,7 +75,7 @@ Material Menu为开发者带来了非常酷炫的Android菜单、返回、删除
 
 Android-ObservableScrollView是一款用于在滚动视图中观测滚动事件的Android库。它能够轻而易举地与Android 5.0 Lollipop引进的工具栏（Toolbar）进行交互，还可以帮助开发者实现拥有Material Design应用视觉体验的界面外观，支持ListView、ScrollView、WebView、RecyclerView、GridView组件。  
 
-![image](http://cms.csdnimg.cn/article/201411/21/546ef6d6abfcd.jpg) ![image](http://cms.csdnimg.cn/article/201411/21/546ef6e476b55.jpg)![image](http://cms.csdnimg.cn/article/201411/21/546ef6eea211e.jpg)
+|| ![image](http://cms.csdnimg.cn/article/201411/21/546ef6d6abfcd.jpg) || ![image](http://cms.csdnimg.cn/article/201411/21/546ef6e476b55.jpg) || ![image](http://cms.csdnimg.cn/article/201411/21/546ef6eea211e.jpg)
 
 
 **10. [Material Design Icons](https://github.com/google/material-design-icons)**  
