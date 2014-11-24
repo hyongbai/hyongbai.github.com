@@ -12,10 +12,10 @@
 * |\.|._)._)
 * --------------------------------- */
 
-body{font-size:14px;word-spacing:1px;
+body{font-size:13px;word-spacing:1px;
 	margin-left:auto;
 margin-right:auto;
-	font-family:"Monaco","Hiragino Sans GB","Microsoft YaHei",Trebuchet,"Trebuchet MS",Tahoma,"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000000;background-color:#ffffff;}
+	font-family:"Hiragino Sans GB","Microsoft YaHei",Trebuchet,"Trebuchet MS",Tahoma,"Lucida Grande","Lucida Sans Unicode",Verdana,sans-serif;color:#000000;background-color:#ffffff;}
 *{padding:0;margin: 0;border:none;outline:none;}
 a{color:#dd0000;text-decoration:none;}
 a:hover{color:#333333;text-decoration:underline;}
@@ -58,7 +58,7 @@ pre,code{font-family:Menlo,"Andale Mono",Consolas,"Courier New",Monaco,monospace
 code{background-color:#f0f0f0;}
 pre {
     border: 1px solid #ccc;
-    font-family: Bitstream Vera Sans Mono,monospace;
+    font-family:Monaco,Bitstream Vera Sans Mono,monospace;
     padding:15px;
     background-color: #f0f0f0;
     -webkit-border-radius: 2px;
