@@ -1,1 +1,1 @@
-[Yourbay](http://yourbay.me)
+Click [Yourbay](http://yourbay.me) to go!:
