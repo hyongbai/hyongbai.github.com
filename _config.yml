@@ -8,6 +8,10 @@ github_username:  hyongbai
 
 # Build settings
 markdown: kramdown
+# markdown: redcarpet
+kramdown:
+    extensions: ["fenced_code_blocks", "autolink", "tables", "strikethrough"]
+
 markdown_ext:  markdown,mkd,mkdn,md
 permalink: /:title/
 name: Hyongbai(Ram Han)
