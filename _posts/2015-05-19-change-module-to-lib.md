@@ -16,22 +16,22 @@ date: 2015-05-19 18:23:57+08:00
 > - 把`defaultConfig`里面的`applicationId`删去
 
 
-```gradle
-apply plugin: 'com.android.library'
 
-android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
-    resourcePrefix 'baseui_'
+	apply plugin: 'com.android.library'
 
-    defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 14
-    }
-}
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.android.support:recyclerview-v7:21.0.+'
-}
-```
+	android {
+	    compileSdkVersion 21
+	    buildToolsVersion "21.1.2"
+	    resourcePrefix 'baseui_'
+
+	    defaultConfig {
+	        minSdkVersion 14
+	        targetSdkVersion 14
+	    }
+	}
+	dependencies {
+	    compile fileTree(dir: 'libs', include: ['*.jar'])
+	    compile 'com.android.support:appcompat-v7:21.0.3'
+	    compile 'com.android.support:recyclerview-v7:21.0.+'
+	}
+
