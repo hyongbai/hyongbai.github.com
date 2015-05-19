@@ -35,13 +35,10 @@ Android的V7包里面使用了Toolbar来代替掉之前的ActionBar了，就可�
 
 那么怎么使用V7包来设置Toolbar的背景以及状态栏的背景颜色呢。可以在demo的style里面看到如下两个属性的设置：
 
-<code>
-
-        <item name="colorPrimary">@color/accent_material_dark</item>
-        
-        <item name="colorPrimaryDark">@color/accent_material_dark</item>
-        
-</code>
+```xml
+<item name="colorPrimary">@color/accent_material_dark</item>
+<item name="colorPrimaryDark">@color/accent_material_dark</item>
+```
 
 第一个colorPrimary即是Toolbar的背景颜色。第二个colorPrimaryDark即是StatusBar的背景色。将两个色值设置成同一个颜色即可以达到所谓的沉寂式体验了。跟iOS的也就无差别了。
 
