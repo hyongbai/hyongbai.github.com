@@ -2,7 +2,7 @@
 
 layout: post
 
-title: "vim快捷键"
+title: "Vim快捷键"
 
 description: "vim"
 

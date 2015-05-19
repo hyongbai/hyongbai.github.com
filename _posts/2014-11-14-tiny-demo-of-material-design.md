@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "tiny demo of material design"
+title: "Demo of material design"
 description: "Android Material Design, Android L"
 category: 日志
 tags: 

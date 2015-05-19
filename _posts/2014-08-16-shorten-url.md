@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "shorten url "
+title: "Shorten url "
 description: "第一篇博客"
 category: 日志
 tags: [Shell]

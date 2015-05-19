@@ -10,7 +10,6 @@ github_username:  hyongbai
 markdown: kramdown
 markdown_ext:  markdown,mkd,mkdn,md
 permalink: /:title/
-baseurl: http://yourbay.me
 name: Hyongbai(Ram Han)
 author: Hyongbai(Ram Han)
 email: hyongbai@gmail.com
