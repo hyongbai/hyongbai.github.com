@@ -1,6 +1,16 @@
+# Site settings
+title: yourbay.me
+email: hyongbai@q-supereme.com
+description: 'Copyright © @hyongbai'
+url: "http://yourbay.me" # the base hostname & protocol for your site
+twitter_username: hyongbai
+github_username:  hyongbai
+
+# Build settings
 markdown: kramdown
+markdown_ext:  markdown,mkd,mkdn,md
 permalink: /:title/
-url: http://yourbay.me
+baseurl: http://yourbay.me
 name: Hyongbai(Ram Han)
 author: Hyongbai(Ram Han)
 email: hyongbai@gmail.com
@@ -10,4 +20,3 @@ weibo: 1854281601
 github: hyongbai
 safe: true
 paginate: 20
-about: "Why so serious! any@hyongbai"
