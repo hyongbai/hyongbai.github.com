@@ -10,7 +10,7 @@ date: 2015-05-20 02:23:57+08:00
 --- 
 ### Volley中文乱码解决方案
 
-Override Request里面的parseNetworkResponse即可。
+Override `Request`里面的`parseNetworkResponse`即可。
 
 	@Override
 	protected Response<String> parseNetworkResponse(NetworkResponse response) {
