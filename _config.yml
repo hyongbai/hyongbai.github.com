@@ -6,14 +6,18 @@ url: "http://yourbay.me" # the base hostname & protocol for your site
 twitter_username: hyongbai
 github_username:  hyongbai
 
+
+highlighter: pygments
 # Build settings
-markdown: kramdown
-# markdown: redcarpet
+markdown: kramdown # [ maruku | rdiscount | kramdown | redcarpet ]
 kramdown:
-    extensions: ["fenced_code_blocks", "autolink", "tables", "strikethrough"]
+  input:         GFM
+  auto_ids:      true
+  auto_id_prefix: 'id-'
+  extensions: ["fenced_code_blocks", "no_intra_emphasis", "autolink", "tables", "strikethrough"]
 
 markdown_ext:  markdown,mkd,mkdn,md
-permalink: /:title/
+permalink: /:categories/:year/:month/:day/:title/
 name: Hyongbai(Ram Han)
 author: Hyongbai(Ram Han)
 email: hyongbai@gmail.com

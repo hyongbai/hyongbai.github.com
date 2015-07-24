@@ -5,7 +5,7 @@ category: 日志
 tags: 
 - AndroidStudio
 - Moudle
-date: 2015-05-19 18:23:57+08:00
+date: 2015-05-19 10:23:57+08:00
 ---
 
 使用AndroidStudio时常常需要将一个`Module`变成一个`lib`。在软件里面似乎招不到直接将其变成`lib`的方法。于是看了下其他的的lib的gradle配置，大致改成如下即可。
