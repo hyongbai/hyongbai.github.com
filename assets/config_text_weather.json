@@ -1,0 +1,6 @@
+{
+    "data_url_github" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
+    "data_url_gitcafe" : "https://gitcafe.com/hyongbai/textweather/raw/master/weather.json",
+    "current_version" : 1,
+    "update_log" : "The very first version"
+}
