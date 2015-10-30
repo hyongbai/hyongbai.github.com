@@ -2,5 +2,6 @@
     "data_url_github" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
     "data_url_gitcafe" : "https://gitcafe.com/hyongbai/textweather/raw/master/weather.json",
     "current_version" : 1,
-    "change_log" : "The very first version"
+    "change_log" : "The very first version",
+    "config_version" : 1443496858
 }
