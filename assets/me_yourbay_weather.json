@@ -1,7 +1,7 @@
 {
     "data_url_github" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
     "data_url_gitcafe" : "https://gitcafe.com/hyongbai/textweather/raw/master/weather.json",
-    "current_version" : 4,
-    "change_log" : "[1.0.0.3]\nmake swipe refresh more smooth.\noptimize http request\n[1.0.0.2]\nfix: cant update weather.\n show update date",
-    "config_version" : 1448247362
+    "current_version" : 5,
+    "change_log" : "[1.0.0.4]\nfix:duplicated located city\nfix:refresh error\nfix:optimize gps\n[1.0.0.3]\nmake swipe refresh more smooth.\noptimize http request",
+    "config_version" : 1450236079
 }
