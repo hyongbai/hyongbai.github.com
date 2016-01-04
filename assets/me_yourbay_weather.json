@@ -3,5 +3,6 @@
     "data_url_gitcafe" : "https://gitcafe.com/hyongbai/textweather/raw/master/weather.json",
     "current_version" : 10,
     "change_log" : "[1.1.0.1]\nbugfix. crash when change location\n[1.1]\nInstant Weather\nOptimize Performance\nCompat for marshmallow\nFix: lose locate and weather info\nFix: UI compatibility in Settings\n[1.0.0.5]\nfix:crash on android 6.0\n[1.0.0.4]\nfix:duplicated located city\nfix:refresh error\nfix:optimize gps\n[1.0.0.3]\nmake swipe refresh more smooth.\noptimize http request",
-    "config_version" : 1450451733
+    "config_version" : 1450451733,
+    "download_url" : "http://yourbay.me/assets/apks/lite-weather/liteweather-yb-1.1.0.1.apk"
 }
