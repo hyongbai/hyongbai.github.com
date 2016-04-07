@@ -1,8 +1,8 @@
 {
     "data_url_github" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
-    "data_url_gitcafe" : "https://gitcafe.com/hyongbai/textweather/raw/master/weather.json",
-    "current_version" : 11,
-    "change_log" : "<b>[1.1.0.2]</b><br/><ul><li>Download updates from browser without open in market</li><br/></ul><br/><b>[1.1.0.1]</b><br/><ul><li>bugfix:crash when change location</li><br/></ul><br/><b>[1.1]</b><br/><ul><li>Instant Weather</li><br/><li>Optimize Performance</li><br/><li>Compat for marshmallow</li><br/><li>fix: lose locate and weather info</li><br/><li>fix: UI compatibility in Settings</li><br/></ul><br/><b>[1.0.0.5]</b><br/><ul><li>fix:crash on android 6.0</li><br/></ul><br/><b>[1.0.0.4]</b><br/><ul><li>fix:duplicated located city</li><br/><li>fix:refresh error</li><br/><li>fix:optimize gps</li><br/></ul><br/><b>[1.0.0.3]</b><br/><ul><li>make swipe refresh more smooth.<br/><li>optimize http request</li><br/></ul>",
+    "data_url_gitcafe" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
+    "current_version" : 15,
+    "change_log" : "<b>[1.1.1]</b><br/><ul><li>优化下拉刷新体验</li><br/><li>整页卡片显示风格</li><br/><li>使用新天气源，国内会更快，不要问我为什么不用雅虎了</li><br/><li>由于天气源变动，如果不能使用，烦请清除应用数据, :(</li><br/></ul><br/>",
     "config_version" : 1450451733,
-    "download_url" : "http://yourbay.me/assets/apks/lite-weather/liteweather-yb-1.1.0.2.apk"
+    "download_url" : "https://raw.githubusercontent.com/hyongbai/textweather/master/asset/apks/liteWeather-1.1.1.apk"
 }
