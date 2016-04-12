@@ -1,8 +1,8 @@
 {
     "data_url_github" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
     "data_url_gitcafe" : "https://raw.githubusercontent.com/hyongbai/textweather/master/weather.json",
-    "current_version" : 17,
-    "change_log" : "<b>[1.3]</b><br/><ul><li>添加气压</li><br/><li>添加AQI信息</li><br/><li>默认通知城市显示错误</li><br/></ul><b>[1.2]</b><br/><ul><li>修复无法搜索城市</li><br/><li>优化容错页</li><br/></ul><b>[1.1.1]</b><br/><ul><li>优化下拉刷新体验</li><br/><li>整页卡片显示风格</li><br/><li>使用新天气源，国内会更快，不要问我为什么不用雅虎了</li><br/><li>由于天气源变动，如果不能使用，烦请清除应用数据, :(</li><br/></ul><br/>",
+    "current_version" : 18,
+    "change_log" : "<b>[1.3.1]</b><br/><ul><li>修复可能到出现城市丢失的情况</li><br/><li>修复实时天气可能不会刷新的问题</li><br/></ul><b>[1.3]</b><br/><ul><li>添加气压</li><br/><li>添加AQI信息</li><br/><li>默认通知城市显示错误</li><br/></ul><b>[1.2]</b><br/><ul><li>修复无法搜索城市</li><br/><li>优化容错页</li><br/></ul><b>[1.1.1]</b><br/><ul><li>优化下拉刷新体验</li><br/><li>整页卡片显示风格</li><br/><li>使用新天气源，国内会更快，不要问我为什么不用雅虎了</li><br/><li>由于天气源变动，如果不能使用，烦请清除应用数据, :(</li><br/></ul><br/>",
     "config_version" : 1450451733,
-    "download_url" : "https://raw.githubusercontent.com/hyongbai/textweather/master/asset/apks/liteWeather-1.3.apk"
+    "download_url" : "https://raw.githubusercontent.com/hyongbai/textweather/master/asset/apks/liteWeather-1.3.1.apk"
 }
