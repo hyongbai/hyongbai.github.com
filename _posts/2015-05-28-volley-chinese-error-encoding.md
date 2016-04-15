@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Volley中文乱码解决方案"
-category: 日志
+category: all-about-tech
 tags: 
 - Volley
 - UTF8

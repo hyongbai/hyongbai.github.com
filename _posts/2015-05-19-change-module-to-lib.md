@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "把Module变成Lib"
-category: 日志
+category: all-about-tech
 tags: 
 - AndroidStudio
 - Moudle

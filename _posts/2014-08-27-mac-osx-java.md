@@ -2,7 +2,7 @@
 layout: post
 title: "OSX 安装JAVA"
 description: "osx java "
-category: 日志
+category: all-about-tech
 tags:
 - Java
 - Osx

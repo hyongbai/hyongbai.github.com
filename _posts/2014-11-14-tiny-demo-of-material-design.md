@@ -2,7 +2,7 @@
 layout: post
 title: "Demo of material design"
 description: "Android Material Design, Android L"
-category: 日志
+category: all-about-tech
 tags: 
 - Android
 - Lollipop

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Xfermode 和 PorterDuff"
-category: 日志
+category: all-about-tech
 tags: 
 - Xfermode
 - PorterDuff

@@ -2,7 +2,7 @@
 layout: post
 title: "Android自动打包 友盟多渠道"
 description: "Android 打包 友盟多渠道"
-category: 日志
+category: all-about-tech
 tags:
 - Android
 - Shell

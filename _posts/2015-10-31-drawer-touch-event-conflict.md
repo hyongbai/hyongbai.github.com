@@ -1,8 +1,7 @@
 ---
 layout: post
 title: "DrawerLayout粗鲁的霸占水平方向的Touch事件"
-description: "第一篇博客"
-category: 日志
+category: all-about-tech
 tags: [GitHub]
 date: 2015-10-31 02:05:09+00:00
 ---

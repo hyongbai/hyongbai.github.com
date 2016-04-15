@@ -6,7 +6,7 @@ title: "Vim快捷键"
 
 description: "vim"
 
-category: 日志
+category: all-about-tech
 
 tags: [vim]
 

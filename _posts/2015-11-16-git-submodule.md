@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[转]Git Submodule使用完整教程"
-category: git
+category: all-about-tech
 tags: 
  - scm
  - git

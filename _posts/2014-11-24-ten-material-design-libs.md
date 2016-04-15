@@ -2,7 +2,7 @@
 layout: post
 title: "十大Material Design开源项目"
 description: "Android Material Design, Android L， Sample"
-category: 日志
+category: all-about-tech
 tags: 
 - Android
 - Lollipop

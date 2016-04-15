@@ -9,6 +9,7 @@ github_username:  hyongbai
 
 highlighter: pygments
 # Build settings
+gems: [jekyll-paginate]
 markdown: kramdown # [ maruku | rdiscount | kramdown | redcarpet ]
 kramdown:
   input:         GFM

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "SetTint或者ColorFilter改变图片的颜色"
-category: 日志
+category: all-about-tech
 tags: 
 - ColorFilter
 - Drawable

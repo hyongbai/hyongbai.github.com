@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "使用gradle编译Eclipse工程-AndroidStudio导入Eclipse"
-category: 日志
+category: all-about-tech
 tags: 
 - gradle
 - eclipse

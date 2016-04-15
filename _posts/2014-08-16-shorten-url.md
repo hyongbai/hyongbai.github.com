@@ -1,8 +1,7 @@
 ---
 layout: post
 title: "Shorten url "
-description: "第一篇博客"
-category: 日志
+category: all-about-tech
 tags: [Shell]
 date: 2014-08-16 21:32:57+00:00
 ---
