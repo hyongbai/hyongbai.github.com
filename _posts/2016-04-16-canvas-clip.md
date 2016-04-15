@@ -6,7 +6,7 @@ tags:
  - android
  - canvas
  - clip
-date: 2016-04-16 02:05:57+00:00
+date: 2016-04-15 02:05:57+00:00
 ---
 
 最近把canvas的clip函数给过了一遍。整理并记录下来给有需要的朋友.
@@ -67,6 +67,13 @@ canvas.clipRect(mClipRect1, Region.Op.values()[index - countOffset]);
 |REVERSE_DIFFERENCE|跟`DIFFERENCE`相对，取**后来区域**不相交的集合。|
 |REPLACE| 即**替换**，完全只使用**后来作用**的区域。|
 
+### 总结
+
+然而，这个有卵用？
+
+当然有! 比如你想让你的view拥有一个圆角矩形或者实现微信图片消息的形状(当然还可以有其他方案来实现)。等等
+
+### 最后
 
 下面是整段代码:
 
