@@ -18,13 +18,130 @@ date: 2016-04-26 02:05:57+00:00
 希望每一个爱学习的同学都把自己平时学习的心得体会写出来，避免自己以后犯错，也为他人谋福利。
 
 ### 介绍
-Path其实是android中很常见的一个类。它方便让用户自己先确定好一个轨迹后，方便在Canvas上面画出来。其实就是所谓矢量图形。比如我们常见的svg图片其实就是一层一层的Path轨迹排列组合出来的。想了解svg使用的可以参考[svg-android](https://code.google.com/archive/p/svg-android/).
+Path其实是android中很常见的一个类。它方便让用户自己先确定好一个轨迹后，方便在Canvas上面画出来。其实就是所谓矢量图形。比如我们常见的svg图片其实就是一层一层的Path轨迹排列组合出来的。想了解svg使用的可以参考[svg-android](https://code.google.com/archive/p/svg-android/).关于Path就不多说了。自行Google。
 
-...
+### 如何在Path上面运动。
 
-**<文章没写完>**
+其实也不是什么神秘的事情，Android提供了`PathMeasure`这个类。可以通过它来获取到整个`Path`的长度。然后我们可以通过它来获取某一段长度的path。然后使用animator不断获取改变区间，并把这个path不断画出来即可以动起来了。
 
-...
+使用这个API：
+
+```Java
+/**
+ * Given a start and stop distance, return in dst the intervening
+ * segment(s). If the segment is zero-length, return false, else return
+ * true. startD and stopD are pinned to legal values (0..getLength()).
+ * If startD <= stopD then return false (and leave dst untouched).
+ * Begin the segment with a moveTo if startWithMoveTo is true.
+ *
+ * <p>On {@link android.os.Build.VERSION_CODES#KITKAT} and earlier
+ * releases, the resulting path may not display on a hardware-accelerated
+ * Canvas. A simple workaround is to add a single operation to this path,
+ * such as <code>dst.rLineTo(0, 0)</code>.</p>
+ */
+public boolean getSegment(float startD, float stopD, Path dst, boolean startWithMoveTo) {
+    dst.isSimplePath = false;
+    return native_getSegment(native_instance, startD, stopD, dst.ni(), startWithMoveTo);
+}
+```
+通过这个api，我们可以获取到startD到stopD这一段的path。这样就可以实现截取一小段的问题。
+
+其实要想让整个动画顺畅起来，用这个api是不能简单达到的。比如你想实现0.9到0.1这一段距离，你不能简单的使用 `startD = 0.9f * len, stopD = 0.1f * len` ,结果就是它只会显示0.9到1.0这一段。那么问题就来了，怎样才能显示出来0.9到1.0呢。其实思路很简单，它不允许超过1.0的话，我可以把它拆成两端嘛：`0.9~1.0`跟`0.0~0.1`。然后把这两段合并即可。同样的，比如我想实现-0.1到1.0这一段的话，也可以用这种思路，不过需要指出的时候PathMeasure只认正数。下面是我的解决方案：
+
+```Java
+public static void setSegment(PathMeasure pm, Path p, float start, float end) {
+    final float totalLen = pm.getLength();
+    float len = end - start;
+    // 长度超过1没有意义
+    if (Math.abs(len) > 1) {
+        len = len > 0 ? 1 : -1;
+    }
+    // 起始点在-1和1之间
+    while (Math.abs(start) > 1) {
+        //变成(-1,1)
+        start = start + (start > 0 ? -1 : 1);
+    }
+    end = start + len;
+    //
+    start = Math.min(start, end);
+    end = start + Math.abs(len);
+    //
+    if (start < 0) {
+        if (end < 0) {
+            pm.getSegment((1 + start) * totalLen, (1 + end) * totalLen, p, true);
+            return;
+        }
+        pm.getSegment((1 + start) * totalLen, totalLen, p, true);
+        start = 0;
+    }
+    if (end > 1) {
+        pm.getSegment(0, (end - 1) * totalLen, p, true);
+        end = 1;
+    }
+    pm.getSegment(start * totalLen, end * totalLen, p, true);
+}
+```
+
+但是，path还有一个问题就是，一个path可以包含N个闭合路径。默认的操作都是在第一个闭合路径上面进行的。于是就有了下面的代码:
+
+```Java
+public List<Pair<Path, PathMeasure>> extract() {
+    if (mPathMeasure == null || mRawPath == null) {
+        return null;
+    }
+    mList.clear();
+    do {
+        final float len = mPathMeasure.getLength();
+        Path path = new Path();
+        mPathMeasure.getSegment(0, len, path, true);
+        path.close();
+        //
+        mList.add(new Pair<>(path, new PathMeasure(path, true)));
+    } while (mPathMeasure.nextContour());
+    return mList;
+}
+```
+这段代码的主要作用是把一个Path分解成N个闭合路径，每一个路径生成一个单独的只有一条路径的path.
+
+这样我们就可以在一个复杂的path上面将每一个闭合路径都显示出来了。当然了，如果需要动起来的话，我们还要有一个Animator。如下:
+
+```Java
+public Animator start() {
+    if (mAnimator != null) {
+        mAnimator.cancel();
+    }
+    //
+    final float lastProgress = (mProgress > 0 && mProgress < 1) ? mProgress : 0;
+    //
+    final ValueAnimator animator = ValueAnimator.ofFloat(0, 1.0f);
+    animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            final Object value = animation.getAnimatedValue();
+            if (value instanceof Float) {
+                mProgress = ((Float) value).floatValue();
+                invalidateSelf();
+            }
+        }
+    });
+    animator.setInterpolator(new TimeInterpolator() {
+        @Override
+        public float getInterpolation(float input) {
+            input += lastProgress;
+            if (input > 1) {
+                input = input - 1;
+            }
+            return (mInterpolator != null) ? mInterpolator.getInterpolation(input) : input;
+        }
+    });
+    animator.setRepeatMode(ValueAnimator.RESTART);
+    animator.setRepeatCount(-1);
+    animator.setDuration(500);
+    animator.start();
+    //
+    return mAnimator = animator;
+}
+```
 
 ### 坑
 
@@ -134,3 +251,6 @@ protected boolean verifyDrawable(Drawable who) {
 }
 ```
 
+### 总结
+
+有坑不怕，来来来，我们看源码。
