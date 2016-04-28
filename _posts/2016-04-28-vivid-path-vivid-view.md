@@ -17,6 +17,10 @@ date: 2016-04-26 02:05:57+00:00
 
 希望每一个爱学习的同学都把自己平时学习的心得体会写出来，避免自己以后犯错，也为他人谋福利。
 
+效果图：
+
+![image](/media/imgs/vivid-path-vivid-view.gif)
+
 ### 介绍
 Path其实是android中很常见的一个类。它方便让用户自己先确定好一个轨迹后，方便在Canvas上面画出来。其实就是所谓矢量图形。比如我们常见的svg图片其实就是一层一层的Path轨迹排列组合出来的。想了解svg使用的可以参考[svg-android](https://code.google.com/archive/p/svg-android/).关于Path就不多说了。自行Google。
 
