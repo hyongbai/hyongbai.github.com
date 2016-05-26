@@ -6,17 +6,6 @@ url: "http://yourbay.me" # the base hostname & protocol for your site
 twitter_username: hyongbai
 github_username:  hyongbai
 
-
-highlighter: pygments
-# Build settings
-gems: [jekyll-paginate]
-markdown: kramdown # [ maruku | rdiscount | kramdown | redcarpet ]
-kramdown:
-  input:         GFM
-  auto_ids:      true
-  auto_id_prefix: 'id-'
-  extensions: ["fenced_code_blocks", "no_intra_emphasis", "autolink", "tables", "strikethrough"]
-
 markdown_ext:  markdown,mkd,mkdn,md
 permalink: /:categories/:year/:month/:day/:title/
 name: Hyongbai(Ram Han)
@@ -28,3 +17,8 @@ weibo: 1854281601
 github: hyongbai
 safe: true
 paginate: 20
+
+# Build settings
+gems: [jekyll-paginate]
+markdown: redcarpet # [ maruku | rdiscount | kramdown | redcarpet ]
+highlighter: pygments
