@@ -19,6 +19,10 @@ safe: true
 paginate: 20
 
 # Build settings
-gems: [jekyll-paginate]
+sass:
+  sass_dir: _sass
+  style: :compressed
+gems: 
+  - jekyll-paginate
 markdown: redcarpet # [ maruku | rdiscount | kramdown | redcarpet ]
 highlighter: pygments
