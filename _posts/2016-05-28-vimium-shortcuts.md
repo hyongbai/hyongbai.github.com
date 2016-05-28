@@ -1,13 +1,16 @@
 ---
 layout: post
-title: "Spiral matrix"
+title: "Vimium shortcuts"
 category: all-about-tech
 tags: 
- - algo
- - spial matrix
-date: 2016-05-12 12:05:57+00:00
+ - chromium
+ - chrome
+ - browser
+ - hack
+ - trick
+ - shortcuts
+date: 2016-05-26 09:45:57+00:00
 ---
-
 
 Vimium is a Chrome extension that provides keyboard-based navigation and control of the web in the spirit of
 the Vim editor.
