@@ -30,7 +30,7 @@ Path其实是android中很常见的一个类。它方便让用户自己先确定
 
 使用这个API：
 
-```Java
+{% highlight java %}
 /**
  * Given a start and stop distance, return in dst the intervening
  * segment(s). If the segment is zero-length, return false, else return
@@ -47,12 +47,12 @@ public boolean getSegment(float startD, float stopD, Path dst, boolean startWith
     dst.isSimplePath = false;
     return native_getSegment(native_instance, startD, stopD, dst.ni(), startWithMoveTo);
 }
-```
+{% endhighlight %}
 通过这个api，我们可以获取到startD到stopD这一段的path。这样就可以实现截取一小段的问题。
 
 其实要想让整个动画顺畅起来，用这个api是不能简单达到的。比如你想实现0.9到0.1这一段距离，你不能简单的使用 `startD = 0.9f * len, stopD = 0.1f * len` ,结果就是它只会显示0.9到1.0这一段。那么问题就来了，怎样才能显示出来0.9到1.0呢。其实思路很简单，它不允许超过1.0的话，我可以把它拆成两端嘛：`0.9~1.0`跟`0.0~0.1`。然后把这两段合并即可。同样的，比如我想实现-0.1到1.0这一段的话，也可以用这种思路，不过需要指出的时候PathMeasure只认正数。下面是我的解决方案：
 
-```Java
+{% highlight java %}
 public static void setSegment(PathMeasure pm, Path p, float start, float end) {
     final float totalLen = pm.getLength();
     float len = end - start;
@@ -84,11 +84,11 @@ public static void setSegment(PathMeasure pm, Path p, float start, float end) {
     }
     pm.getSegment(start * totalLen, end * totalLen, p, true);
 }
-```
+{% endhighlight %}
 
 但是，path还有一个问题就是，一个path可以包含N个闭合路径。默认的操作都是在第一个闭合路径上面进行的。于是就有了下面的代码:
 
-```Java
+{% highlight java %}
 public List<Pair<Path, PathMeasure>> extract() {
     if (mPathMeasure == null || mRawPath == null) {
         return null;
@@ -104,12 +104,12 @@ public List<Pair<Path, PathMeasure>> extract() {
     } while (mPathMeasure.nextContour());
     return mList;
 }
-```
+{% endhighlight %}
 这段代码的主要作用是把一个Path分解成N个闭合路径，每一个路径生成一个单独的只有一条路径的path.
 
 这样我们就可以在一个复杂的path上面将每一个闭合路径都显示出来了。当然了，如果需要动起来的话，我们还要有一个Animator。如下:
 
-```Java
+{% highlight java %}
 public Animator start() {
     if (mAnimator != null) {
         mAnimator.cancel();
@@ -145,7 +145,7 @@ public Animator start() {
     //
     return mAnimator = animator;
 }
-```
+{% endhighlight %}
 
 ### 坑
 
@@ -156,7 +156,7 @@ public Animator start() {
 
 我看了下IamgeView里面关于`setImageDrawable`的源码。如下：
 
-```Java
+{% highlight java %}
 public void setImageDrawable(@Nullable Drawable drawable) {
     if (mDrawable != drawable) {
         mResource = 0;
@@ -173,10 +173,10 @@ public void setImageDrawable(@Nullable Drawable drawable) {
         invalidate();
     }
 }
-```
+{% endhighlight %}
 可以看到，当drawable传递过来的时候会执行了一个关键的`updateDrawable(drawable)`. 如下：
 
-```Java
+{% highlight java %}
 private void updateDrawable(Drawable d) {
     if (d != mRecycleableBitmapDrawable && mRecycleableBitmapDrawable != null) {
         mRecycleableBitmapDrawable.setBitmap(null);
@@ -207,22 +207,22 @@ private void updateDrawable(Drawable d) {
         mDrawableWidth = mDrawableHeight = -1;
     }
 }
-```
+{% endhighlight %}
 这时候可能还是不知道为啥。为什么ImageView就可以。此时，我们回到最初产生问题的地方。也就是Drawable里面的`invalidateSelf()`. 源码如下：
 
-```Java
+{% highlight java %}
 public void invalidateSelf() {
     final Callback callback = getCallback();
     if (callback != null) {
         callback.invalidateDrawable(this);
     }
 }
-````
+{% endhighlight %}`
 有没有发现`invalidateSelf()`之后，会通过一个`CallBack`调用`callback.invalidateDrawable(this)`.此时就可以`updateDrawable`对应起来了，从它的源码可以看到它会把传过来的有效的drawable通过`setCallBack`把`CallBack`设置到Drawable里面。
 
 在我以为雨过天晴，一切都将要顺风顺水的时候。我重新编译运行后发现，依然如故。就像一杯老酒，给人的挫败依然浓烈。不过，我们再看一下CallBack的实现的地方(View继承了那个`CallBack`)就可以知道问题了。先看源码:
 
-```Java
+{% highlight java %}
 @Override
 public void invalidateDrawable(@NonNull Drawable drawable) {
     if (verifyDrawable(drawable)) {
@@ -235,25 +235,25 @@ public void invalidateDrawable(@NonNull Drawable drawable) {
         rebuildOutline();
     }
 }
-```
+{% endhighlight %}
 
 在这里我们就看到了熟悉的`invalidate`，啊哈哈哈。也就是说如果没有刷新界面，那就是`invalidate`没有执行到。所以问题就出在了`verifyDrawable(drawable)`这个地方，源码如下:
 
-```Java
+{% highlight java %}
 protected boolean verifyDrawable(Drawable who) {
     return who == mBackground || (mScrollCache != null && mScrollCache.scrollBar == who)
             || (mForegroundInfo != null && mForegroundInfo.mDrawable == who);
 }
-```
+{% endhighlight %}
 这里其实就是校验了一下，传入的drawable是不是有效的。因此解决方案就是让这里返回`true`即可，但是未免也太简单粗暴了点。下面是我的解决方案:
 
-```Java
+{% highlight java %}
 @Override
 protected boolean verifyDrawable(Drawable who) {
     // when Drawable.invalidateSelf is invoked, view need to check if the drawable is valid, make it valid
     return who == mVividDrawable || super.verifyDrawable(who);
 }
-```
+{% endhighlight %}
 
 ### 总结
 

@@ -10,7 +10,7 @@ date: 2016-05-12 12:05:57+00:00
 
 ### 先贴代码:)
 
-```Java
+{% highlight java %}
 public class Solution {
     private final static int TO_NONE = -1;
     private final static int TO_UP = 3;
@@ -109,4 +109,4 @@ public class Solution {
         return arr == null || arr.length == 0;
     }
 }
-```
+{% endhighlight %}
