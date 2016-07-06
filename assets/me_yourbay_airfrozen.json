@@ -1,0 +1,8 @@
+{
+	"app":{
+	    "vc" : 11,
+	    "log_cn" : "##1.2.3\n\n- 【移除】设备管理器中多余的权限\n- 【修复】开启无障碍后不开启退出冻结\n- 【添加】可通过设置页获取设备管理器的权限\n- 【优化】三星手机上取消每次都弹出获取设备管理器权限的弹框\n\n##1.2.2\n\n- 【新增】取消在任务列表隐藏\n- 【新增】0分钟的锁屏冻结等待时间\n- 【修复】点击放入文件夹中的快捷方式打开应用后被冻住的问题\n\n##1.2.1.1\n\n- 【修复】设置页的崩溃\n- 【修复】其他的一些BUG\n\n##1.2\n\n- 【新增】设置项\n- 【新增】退出即冻结\n- 【新增】灭屏即冻结\n- 【新增】在设置中选择卸载空调狗的功能 :)\n- 【修复】打开快捷方式后会先弹出主界面的问题\n- 【修复】在S7 edge上面不能显示全APP的icon的问题",
+	    "log_en" : "##1.2.3\n\n- 【FIX】Remove useless permission from admin\n- 【FIX】Freeze on quit not work after accessibility is granted\n- 【ADD】Grant admin permission in settings\n- 【FIX】Cancel request admin permission dialog on launch\n\n##1.2.2\n- 【ADD】remove exclude from recent tasks\n- 【ADD】0 minute to wait to freeze on lock\n- 【FIX】Auto frozen by click shortcut in a folder\n\n##1.2\n\n- 【FIX】Crash in Settings\n- 【FIX】BUGs\n\n## 1.1\n\n- 【ADD】Settings\n- 【ADD】Freeze on exit APP\n- 【ADD】Freeze on screen locked\n- 【ADD】Uninstall AirFrozen in settings :)\n- 【FIX】Show AirFrozen when launch through shortcut\n- 【FIX】Can't load APP icon on S7 edge",
+	    "url" : "http://dl.coolapkmarket.com/down/apk_file/2016/0706/me.yourbay.airfrozen-1.2.2-10.apk?_upt=ff91a8f11467830733&md5=29a250c79ccf57156cf8510ccc42bef8"
+	}
+}
