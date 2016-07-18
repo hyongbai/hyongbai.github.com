@@ -1,8 +1,8 @@
 {
 	"app":{
-	    "vc" : 14,
-	    "log_cn" : "##1.2.4.2\n\n- 【修复】多个崩溃\n##1.2.4\n\n- 【添加】关于\n- 【优化】性能\n- 【添加】应用置顶\n- 【添加】根据使用次数排序\n- 【修复】不能在设置中卸载空调狗的问题\n- 【修复】MIUI长按无法弹出操作框的问题##1.2.3\n\n- 【移除】设备管理器中多余的权限\n- 【修复】开启无障碍后不开启退出冻结\n- 【添加】可通过设置页获取设备管理器的权限\n- 【优化】三星手机上取消每次都弹出获取设备管理器权限的弹框\n\n##1.2.2\n\n- 【新增】取消在任务列表隐藏\n- 【新增】0分钟的锁屏冻结等待时间\n- 【修复】点击放入文件夹中的快捷方式打开应用后被冻住的问题\n\n##1.2.1.1\n\n- 【修复】设置页的崩溃\n- 【修复】其他的一些BUG",
-	    "log_en" : "##1.2.4.2\n\n- 【FIX】Crash by tons of bugs\n##1.2.4.1\n\n- 【FIX】Need double tap to launch on shortcut\n##1.2.4\n\n- 【ADD】Pin\n- 【ADD】Optimization\n- 【ADD】Sort by clicked count\n- 【FIX】Option dialog can't show in MIUI\n- 【FIX】Cant uninstall AirFrozen in settings\n##1.2.3\n\n- 【FIX】Remove useless permission from admin\n- 【FIX】Freeze on quit not work after accessibility is granted\n- 【ADD】Grant admin permission in settings\n- 【FIX】Cancel request admin permission dialog on launch\n\n##1.2.2\n- 【ADD】remove exclude from recent tasks\n- 【ADD】0 minute to wait to freeze on lock\n- 【FIX】Auto frozen by click shortcut in a folder\n\n",
-	    "url" : "http://yourbay.me/AirFrozen/assets/AirFrozen-1.2.4.2.apk"
+	    "vc" : 17,
+	    "log_cn" : "## 1.2.5.1\n\n- 【修复】进入选择列表崩溃\n##1.2.5\n\n- 【添加】全选\n- 【添加】白名单\n- 【优化】内存占用\n- 【修复】被卸载的APP也会出现\n- 【优化】退出即冻结速度/卡顿\n##1.2.4.2\n\n- 【修复】多个崩溃\n##1.2.4\n\n- 【添加】关于\n- 【优化】性能\n- 【添加】应用置顶\n- 【添加】根据使用次数排序\n- 【修复】不能在设置中卸载空调狗的问题\n- 【修复】MIUI长按无法弹出操作框的问题",
+	    "log_en" : "## 1.2.5.1\n\n- 【Fix】Crash on open WhiteList\n##1.2.5\n\n- 【ADD】Choose all\n- 【ADD】White list\n- 【FIX】Memory usage\n- 【FIX】Uninstalled app shown in AirFrozen\n- 【ADD】Optimize freeze on exit more smoother\n##1.2.4.2\n\n- 【FIX】Crash by tons of bugs\n##1.2.4.1\n\n- 【FIX】Need double tap to launch on shortcut\n##1.2.4\n\n- 【ADD】Pin\n- 【ADD】Optimization\n- 【ADD】Sort by clicked count\n- 【FIX】Option dialog can't show in MIUI\n",
+	    "url" : "http://yourbay.me/AirFrozen/assets/AirFrozen-1.2.5.1.apk"
 	}
 }
