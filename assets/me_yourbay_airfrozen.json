@@ -1,8 +1,8 @@
 {
 	"app":{
-	    "vc" : 17,
-	    "log_cn" : "## 1.2.5.1\n\n- 【修复】进入选择列表崩溃\n##1.2.5\n\n- 【添加】全选\n- 【添加】白名单\n- 【优化】内存占用\n- 【修复】被卸载的APP也会出现\n- 【优化】退出即冻结速度/卡顿\n##1.2.4.2\n\n- 【修复】多个崩溃\n##1.2.4\n\n- 【添加】关于\n- 【优化】性能\n- 【添加】应用置顶\n- 【添加】根据使用次数排序\n- 【修复】不能在设置中卸载空调狗的问题\n- 【修复】MIUI长按无法弹出操作框的问题",
-	    "log_en" : "## 1.2.5.1\n\n- 【Fix】Crash on open WhiteList\n##1.2.5\n\n- 【ADD】Choose all\n- 【ADD】White list\n- 【FIX】Memory usage\n- 【FIX】Uninstalled app shown in AirFrozen\n- 【ADD】Optimize freeze on exit more smoother\n##1.2.4.2\n\n- 【FIX】Crash by tons of bugs\n##1.2.4.1\n\n- 【FIX】Need double tap to launch on shortcut\n##1.2.4\n\n- 【ADD】Pin\n- 【ADD】Optimization\n- 【ADD】Sort by clicked count\n- 【FIX】Option dialog can't show in MIUI\n",
-	    "url" : "http://yourbay.me/AirFrozen/assets/AirFrozen-1.2.5.1.apk"
+	    "vc" : 18,
+	    "log_cn" : "## 1.2.5.2\n\n- 【增加】加入QQ群\n- 【修复】增加稳定性\n- 【优化】锁屏即冻结等待为0时立即冻结\n## 1.2.5.1\n\n- 【修复】进入选择列表崩溃\n##1.2.5\n\n- 【添加】全选\n- 【添加】白名单\n- 【优化】内存占用\n- 【修复】被卸载的APP也会出现\n- 【优化】退出即冻结速度/卡顿\n##1.2.4.2\n\n- 【修复】多个崩溃",
+	    "log_en" : "## 1.2.5.2\n\n- 【ADD】Optimise peformance\n## 1.2.5.1\n\n- 【Fix】Crash on open WhiteList\n##1.2.5\n\n- 【ADD】Choose all\n- 【ADD】White list\n- 【FIX】Memory usage\n- 【FIX】Uninstalled app shown in AirFrozen\n- 【ADD】Optimize freeze on exit more smoother",
+	    "url" : "http://yourbay.me/AirFrozen/assets/AirFrozen-1.2.5.2.apk"
 	}
 }
