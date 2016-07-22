@@ -16,7 +16,7 @@ comments: no
 
 **捐款方式**
 
-【Alipay】[hyongbai](https://qr.alipay.com/ap9meauipfitn4t148)
+【Alipay】[hyongbai@gmail.com](https://qr.alipay.com/ap9meauipfitn4t148)
 
 ![image](/media/imgs/qr_alipay_hyongbai.jpg)
 
