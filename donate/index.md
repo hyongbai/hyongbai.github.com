@@ -4,6 +4,9 @@ layout: simple
 comments: no
 ---
 
+> 本文网址:
+> yourbay.me/donate
+
 **写在前面**
 
 - 捐一个`甜筒`：￥6，你将得到`1朵`小红花
@@ -25,3 +28,4 @@ Wechat:
 **写在后面**
 
 以上，纯属开玩笑，您随意。 :)
+
