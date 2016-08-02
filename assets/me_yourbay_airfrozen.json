@@ -1,8 +1,8 @@
 {
 	"app":{
-	    "vc" : 18,
-	    "log_cn" : "## 1.2.5.2\n\n- 【增加】加入QQ群\n- 【修复】增加稳定性\n- 【优化】锁屏即冻结等待为0时立即冻结\n## 1.2.5.1\n\n- 【修复】进入选择列表崩溃\n##1.2.5\n\n- 【添加】全选\n- 【添加】白名单\n- 【优化】内存占用\n- 【修复】被卸载的APP也会出现\n- 【优化】退出即冻结速度/卡顿\n##1.2.4.2\n\n- 【修复】多个崩溃",
-	    "log_en" : "## 1.2.5.2\n\n- 【ADD】Optimise peformance\n## 1.2.5.1\n\n- 【Fix】Crash on open WhiteList\n##1.2.5\n\n- 【ADD】Choose all\n- 【ADD】White list\n- 【FIX】Memory usage\n- 【FIX】Uninstalled app shown in AirFrozen\n- 【ADD】Optimize freeze on exit more smoother",
-	    "url" : "http://yourbay.me/AirFrozen/assets/AirFrozen-1.2.5.2.apk"
+	    "vc" : 31,
+	    "log_cn" : "## 1.2.5.6\n\n- 【优化】性能\n- 【添加】一键冻结快捷方式\n- 【添加】冻结系统应用(彩蛋)\n- 【添加】已冻结APP添加雪花标记取消置灰\n\n## 1.2.5.5\n\n- 【优化】释放内存\n- 【修复】从文件夹打开快捷方式崩溃的问题\n- 【修复】在部分三星手机上面锁屏即冻结有时会失效",
+	    "log_en" : "## 1.2.5.6\n\n- 【NEW】Optimization\n- 【NEW】Shortcut for 1 tap freeze\n- 【NEW】Snow icon for frozen apps\n- 【NEW】Freeze system apps(Easter egg)\n\n## 1.2.5.5\n\n- 【FIX】Fail to release memory\n- 【FIX】Auto freeze when launch shortcut in folder\n- 【FIX】Can't freeze on locked on some samsung devices",
+	    "url" : "https://github.com/hyongbai/AirFrozen/releases/download/v1.2.6/AirFrozen-1.2.6.apk"
 	}
 }
