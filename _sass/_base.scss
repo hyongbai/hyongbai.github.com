@@ -129,7 +129,8 @@ pre,
 code {
     font-size: $small-font-size;
     border-radius: 3px;
-    background-color: $darcula-color;
+    border:1px solid #ddd;
+    background-color: $code-bg-color;
     color: $grey-color;
 }
 
