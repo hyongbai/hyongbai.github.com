@@ -24,5 +24,7 @@ sass:
   style: :compressed
 gems: 
   - jekyll-paginate
-markdown: redcarpet # [ maruku | rdiscount | kramdown | redcarpet ]
+# markdown: redcarpet # [ maruku | rdiscount | kramdown | redcarpet ]
+# redcarpet:
+#     extensions: ["tables"]
 highlighter: pygments
