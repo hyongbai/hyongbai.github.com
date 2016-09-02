@@ -2,7 +2,7 @@
 layout: post
 title: "A successful Git branching model"
 category: all-about-tech
-date: 2016-08-20 18:27:57+00:00
+date: 2016-08-22 18:27:57+00:00
 ---
 
 <p>In this post I present the development model that I’ve introduced for all of my
