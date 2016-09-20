@@ -2,7 +2,7 @@
 layout: post
 title: "命令行代替搬瓦工kiwi"
 description: "命令行代替搬瓦工kiwi"
-category: 日志
+category: all-about-tech
 tags: [GitHub]
 date: 2016-09-19 23:05:57+00:00
 ---
