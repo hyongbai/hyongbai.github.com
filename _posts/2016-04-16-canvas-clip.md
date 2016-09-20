@@ -14,7 +14,7 @@ date: 2016-04-15 02:05:57+00:00
 ### 介绍
 翻看了下Canvas的源码，关于clip相关的函数，一共有如下几个:
 
-```Java
+{% highlight java %}
 clipPath(@NonNull Path path) 
 clipPath(@NonNull Path path, @NonNull Region.Op op)
 clipRect(float left, float top, float right, float bottom) clipRect(float left, float top, float right, float bottom,@NonNull Region.Op op)
@@ -25,7 +25,7 @@ clipRect(@NonNull RectF rect)
 clipRect(@NonNull RectF rect, @NonNull Region.Op op)
 clipRegion(@NonNull Region region)
 clipRegion(@NonNull Region region, @NonNull Region.Op op)
-```
+{% endhighlight %}
 
 其中最后两个clipRegion相关的已经deprecated。
 
