@@ -28,6 +28,7 @@ date: 2016-09-19 23:05:57+00:00
 
 想着以后直接一个reboot就好了，谁想记id和key谁记，我不。于是写了如下的shell脚本，放到`.bash_profile`中，在终端执行`bwg_reboot`即可。
 
+~~~ shell
 	__request_bwg()
 	{
 	    __option="${1}"
@@ -43,7 +44,7 @@ date: 2016-09-19 23:05:57+00:00
 	    alias bwg_start='__request_bwg "start" "${API_KEY}"'
 	    alias bwg_reboot='__request_bwg "restart" "${API_KEY}"'
 	}
-
+~~~
 
 妈妈再也不用担心我要重启搬瓦工了。
 

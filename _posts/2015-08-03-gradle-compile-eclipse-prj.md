@@ -18,13 +18,13 @@ Android Studio越来越好用了，以至于本来用的IntelliJ都觉得不够�
 
 ### 不啰嗦，直接上结果
 
-> 第一步，可以先创建一个Android Studio工程。
+- 第一步，可以先创建一个Android Studio工程。
 
-> 第二步，把`.gradle/`、`gradle/`、`gradlew`、`gradlew.bat`、`build.gradle`拷贝到工程根目录。
+- 第二步，把`.gradle/`、`gradle/`、`gradlew`、`gradlew.bat`、`build.gradle`拷贝到工程根目录。
 
-> 第三步，打开`build.gradle`并添加如下内容:<br/>
+- 第三步，打开`build.gradle`并添加如下内容:<br/-
 
-```
+~~~groovy
 buildscript {
     repositories {
         jcenter()
@@ -80,15 +80,15 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
-```
+~~~
 
-> 第四步，根据自己的项目情况将`builder.gradle`中的`applicationId`,`testApplicationId`等更改成自己所需要的。
+- 第四步，根据自己的项目情况将`builder.gradle`中的`applicationId`,`testApplicationId`等更改成自己所需要的。
 
-> 最后，在AndroidStudio中打开刚刚的工程。编译，运行成功。
+- 最后，在AndroidStudio中打开刚刚的工程。编译，运行成功。
 
-需要注意的是，记得在`.gitignore`里面添加如下内容以免给别人带来不必要的麻烦:<br/>
+需要注意的是，记得在`.gitignore`里面添加如下内容以免给别人带来不必要的麻烦:<br/-
 
-```
+~~~yml
 .gradle
 build/
  
@@ -97,4 +97,4 @@ gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
-```
+~~~

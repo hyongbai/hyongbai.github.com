@@ -27,4 +27,4 @@ gems:
 # markdown: redcarpet # [ maruku | rdiscount | kramdown | redcarpet ]
 # redcarpet:
 #     extensions: ["tables"]
-highlighter: pygments
+highlighter: rouge

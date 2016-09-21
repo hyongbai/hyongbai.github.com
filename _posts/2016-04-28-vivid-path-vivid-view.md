@@ -30,7 +30,7 @@ Path其实是android中很常见的一个类。它方便让用户自己先确定
 
 使用这个API：
 
-{% highlight java %}
+~~~java
 /**
  * Given a start and stop distance, return in dst the intervening
  * segment(s). If the segment is zero-length, return false, else return
@@ -47,7 +47,8 @@ public boolean getSegment(float startD, float stopD, Path dst, boolean startWith
     dst.isSimplePath = false;
     return native_getSegment(native_instance, startD, stopD, dst.ni(), startWithMoveTo);
 }
-{% endhighlight %}
+~~~ 
+
 通过这个api，我们可以获取到startD到stopD这一段的path。这样就可以实现截取一小段的问题。
 
 其实要想让整个动画顺畅起来，用这个api是不能简单达到的。比如你想实现0.9到0.1这一段距离，你不能简单的使用 `startD = 0.9f * len, stopD = 0.1f * len` ,结果就是它只会显示0.9到1.0这一段。那么问题就来了，怎样才能显示出来0.9到1.0呢。其实思路很简单，它不允许超过1.0的话，我可以把它拆成两端嘛：`0.9~1.0`跟`0.0~0.1`。然后把这两段合并即可。同样的，比如我想实现-0.1到1.0这一段的话，也可以用这种思路，不过需要指出的时候PathMeasure只认正数。下面是我的解决方案：
@@ -217,7 +218,8 @@ public void invalidateSelf() {
         callback.invalidateDrawable(this);
     }
 }
-{% endhighlight %}`
+{% endhighlight %}
+
 有没有发现`invalidateSelf()`之后，会通过一个`CallBack`调用`callback.invalidateDrawable(this)`.此时就可以`updateDrawable`对应起来了，从它的源码可以看到它会把传过来的有效的drawable通过`setCallBack`把`CallBack`设置到Drawable里面。
 
 在我以为雨过天晴，一切都将要顺风顺水的时候。我重新编译运行后发现，依然如故。就像一杯老酒，给人的挫败依然浓烈。不过，我们再看一下CallBack的实现的地方(View继承了那个`CallBack`)就可以知道问题了。先看源码:
