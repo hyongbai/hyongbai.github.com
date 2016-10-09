@@ -15,7 +15,6 @@ duoshuo: yourbay
 baidu: 3234957
 weibo: 1854281601
 github: hyongbai
-safe: true
 paginate: 20
 
 # Build settings
@@ -24,7 +23,5 @@ sass:
   style: :compressed
 gems: 
   - jekyll-paginate
-# markdown: redcarpet # [ maruku | rdiscount | kramdown | redcarpet ]
-# redcarpet:
-#     extensions: ["tables"]
+markdown: kramdown # [ maruku | rdiscount | kramdown | redcarpet ]
 highlighter: rouge
