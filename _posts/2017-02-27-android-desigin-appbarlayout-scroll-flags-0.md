@@ -21,9 +21,8 @@ balabalba不说了。
 AppBarLayout的滚动样式分为5种。
 
 - `SCROLL_FLAG_ENTER_ALWAYS`:手指往上滚动时(即Scroll Down时)，View会消失。反之，View会跟随手指滑动慢慢出现。
-- `SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED`:此标志位依赖`SCROLL_FLAG_ENTER_ALWAYS`并且View需要设定
-`minHeight`才会生效。比如将`minHeight`设定为`14dp`。手指往上滚动时View仍然会消失。反过来，跟上面不一样的是，View在NestScrolling没有滑动到顶部的时候，View最多只会更随出现`14dp`也就是`minHeight`的高度。当到顶部的时候，方才会慢慢显示剩下的部分。
-- `SCROLL_FLAG_EXIT_UNTIL_COLLAPSED`:此标志位需要依赖View设定`minHeight`才会生效。手指往上滚动时，也就是View的Exit状态，View会留下`minHeight`的一段高度露出来，而不会向前面一样完全消失。手指往下滚动时，此标志类似于`SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED`的状态。
+- `SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED`:此标志位依赖`SCROLL_FLAG_ENTER_ALWAYS`。且会跟`minHeight`有关。比如将`minHeight`设定为`14dp`。手指往上滚动时View仍然会消失。反过来，跟上面不一样的是，View在NestScrolling没有滑动到顶部的时候，View最多只会更随出现`14dp`也就是`minHeight`的高度。当到顶部的时候，方才会慢慢显示剩下的部分。
+- `SCROLL_FLAG_EXIT_UNTIL_COLLAPSED`:此标志位会跟`minHeight`有关。手指往上滚动时，也就是View的Exit状态，View会留下`minHeight`的一段高度露出来，而不会向前面一样完全消失。手指往下滚动时，此标志类似于`SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED`的状态。
 - `SCROLL_FLAG_SNAP`:手指停下来的时候，View会根据自身露出来的高度，自动折叠或者伸张。
 - `SCROLL_FLAG_SCROLL`:以上所有的标志为都依赖于此标志方能工作。
 
