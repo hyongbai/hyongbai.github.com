@@ -55,7 +55,7 @@ date: 2016-10-08 23:59:00+00:00
 
 整段代码如下：
 
-~~~js
+```js
 // android 下 chrome 浏览器通过 intent 协议唤起钱包
 var packageKey = 'AlipayGphone';
 if (isRc) {
@@ -73,7 +73,7 @@ if (!openIntentLink) {
 openIntentLink.href = intentUrl;
 // 执行click
 openIntentLink.dispatchEvent(customClickEvent());
-~~~
+```
 
 因此我们只需要查看`intentUrl`对应的值即可，于是在330行处加了一个断点。
 
@@ -83,7 +83,7 @@ openIntentLink.dispatchEvent(customClickEvent());
 
 于是嘿嘿，答案就来了:
 
-~~~js
+```js
 	intent://platformapi/startapp?saId=10000007
 	&clientVersion=3.7.0.0718
 	&qrcode=https%3A%2F%2Fqr.alipay.com%2Fap9meauipfitn4t148%3F_s%3Dweb-other
@@ -91,11 +91,11 @@ openIntentLink.dispatchEvent(customClickEvent());
 	scheme=alipayqr;
 	package=com.eg.android.AlipayGphone;
 	end
-~~~
+```
 
 翻译成Android可以理解的URI为：
 
-~~~java
+```java
     public static boolean openAlipayPayPage(Context context) {
         return openAlipayPayPage(context, "https://qr.alipay.com/ap9meauipfitn4t148");
     }
@@ -115,7 +115,7 @@ openIntentLink.dispatchEvent(customClickEvent());
         }
         return false;
     }
-~~~
+```
 
 看了一下js代码，其中`_t`是当前的时间戳，因此上面这个值使用的是调用时的时间戳`System.currentTimeMillis()`
 

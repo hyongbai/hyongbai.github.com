@@ -47,10 +47,10 @@ clipRegion(@NonNull Region region, @NonNull Region.Op op)
 
 核心代码其实是：
 
-~~~java
+```java
 canvas.clipRect(mClipRect0);
 canvas.clipRect(mClipRect1, Region.Op.values()[index - countOffset]);
-~~~
+```
 
 `mClipRect0`是左上角的矩形，`mClipRect1`是右下角的矩形。第二次clipRect通过不同的`Op`作用于前面clipRect的结果从而产生不同的效果。
 
@@ -78,7 +78,7 @@ canvas.clipRect(mClipRect1, Region.Op.values()[index - countOffset]);
 下面是整段代码:
 
 
-~~~java
+```java
 public class CanvasClipView extends View {
     private int mColumns = 3;
     private int mVerCount;
@@ -209,4 +209,4 @@ public class CanvasClipView extends View {
         canvas.drawRoundRect(rectF, rectF.width() / 2, rectF.height() / 2, mPaint);
     }
 }
-~~~
+```

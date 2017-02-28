@@ -33,7 +33,7 @@ AppBarLayout的滚动样式分为5种。
 
 下面是我做实验时写的小DEMO中的部分代码:
 
-~~~Java
+```java
 public class AppLayoutFragment extends BNFragment {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -71,9 +71,9 @@ public class AppLayoutFragment extends BNFragment {
         toolbar.setLayoutParams(alp);
     }
 }
-~~~
+```
 
-~~~XML
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -151,6 +151,6 @@ public class AppLayoutFragment extends BNFragment {
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>
-~~~
+```
 
 

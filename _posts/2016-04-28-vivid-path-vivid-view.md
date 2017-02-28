@@ -30,7 +30,7 @@ Path其实是android中很常见的一个类。它方便让用户自己先确定
 
 使用这个API：
 
-~~~java
+```java
 /**
  * Given a start and stop distance, return in dst the intervening
  * segment(s). If the segment is zero-length, return false, else return
@@ -47,7 +47,7 @@ public boolean getSegment(float startD, float stopD, Path dst, boolean startWith
     dst.isSimplePath = false;
     return native_getSegment(native_instance, startD, stopD, dst.ni(), startWithMoveTo);
 }
-~~~ 
+``` 
 
 通过这个api，我们可以获取到startD到stopD这一段的path。这样就可以实现截取一小段的问题。
 

@@ -35,7 +35,7 @@ date: 2017-02-24 11:59:00+00:00
 - $?  上个命令的退出状态，或函数的返回值。
 - $$  当前Shell进程ID。对于 Shell 脚本，就是这些脚本所在的进程ID。
 
-~~~Shell
+```Shell
 #!/bin/bash
 function bfunc()
 {
@@ -54,7 +54,7 @@ function afunc()
 }
 
 afunc "a" "b" "c" "d"
-~~~
+```
 
 上述代码的执行结果是:
 

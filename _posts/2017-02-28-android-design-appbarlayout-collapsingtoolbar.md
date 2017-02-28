@@ -16,9 +16,9 @@ date: 2017-02-27 04:11:00+00:00
 
 表示【展开】状态下Title左边的Margin。同理还有`expandedTitleMarginEnd` `expandedTitleMarginTop` `expandedTitleMarginBottom`等。看名字应该就知道其意义了，不多介绍。默认值都是`0`
 
-~~~Java
+```java
  mExpandedMarginStart = mExpandedMarginTop = mExpandedMarginEnd = mExpandedMarginBottom = a.getDimensionPixelSize(R.styleable.CollapsingToolbarLayout_expandedTitleMargin, 0);
-~~~
+```
 
 #### expandedTitleGravity和collapsedTitleGravity
 分别表示展开和折叠时Title的gravity。前者默认为`GravityCompat.START | Gravity.BOTTOM`，后者默认为`GravityCompat.START | Gravity.CENTER_VERTICAL`
@@ -32,7 +32,7 @@ date: 2017-02-27 04:11:00+00:00
 #### scrimVisibleHeightTrigger
 显示contentScrim的高度。默认值为-1。但是，并不是inflate的时候给了-1就说它的值就是-1了。你只要设定`contentScrim`就需要这个trigger。它的计算方式如下：
 
-~~~Java
+```java
     public int getScrimVisibleHeightTrigger() {
         if (mScrimVisibleHeightTrigger >= 0) {
             // If we have one explicitly set, return it
@@ -52,14 +52,14 @@ date: 2017-02-27 04:11:00+00:00
         // guess at 1/3 of our height being visible
         return getHeight() / 3;
     }
-~~~
+```
 
 可以看到，如果有设定正确的高度的话，就直接使用正确的高度。否则，如果设置了`miniHeight`的话，它会使用两倍minHeight加上insetTop两者和整个View的高度的最小值。如果没有`miniHeight`的话，他就简单粗暴地使用View高度的一半。为什么要加一个“insetTop”呢？我猜是因为还有个属性叫做`statusBarScrim`。
 
 #### toolbarId
 此属性表示与CollapsingToolbarLayout合作的Toolbar的id。默认为-1。那么它是怎么知道那个是Toolbar呢？翻看下源码中的`ensureToolbar()`函数可以看到：
 
-~~~Java
+```java
     private void ensureToolbar() {
         if (!mRefreshToolbar) {
             return;
@@ -94,7 +94,7 @@ date: 2017-02-27 04:11:00+00:00
         updateDummyView();
         mRefreshToolbar = false;
     }
-~~~
+```
 
 如果设定了Toolbar，那么它会根据id去`findViewById`。接下来如果发现`mToolbar`为空的话，它回去子View中遍历一遍，直到找到Toolbar为止。这就是为什么`CollapsingToolbarLayout`和`Toolbar`基情满满的原因。
 
@@ -115,7 +115,7 @@ date: 2017-02-27 04:11:00+00:00
 
 下面端上来热腾腾的。。。。。。。。。。。。。。。。。。。。。。。源码
 
-~~~Java
+```java
 protected void onAttachedToWindow() {
     super.onAttachedToWindow();
 
@@ -134,11 +134,11 @@ protected void onAttachedToWindow() {
         ViewCompat.requestApplyInsets(this);
     }
 }
-~~~
+```
 
 通过上面的代码可以了解到，在Layout被Attach到Window的时候，会判断parent是不是AppBarLayout如果是则会向其注册一个OffsetUpdateListener(也就是说只有CollapsingToolbarLayout被嵌套在AppBarLayout的时候才会起作用)。用来监听AppBarLayout的滑动距离。如下：
 
-~~~Java
+```java
 private class OffsetUpdateListener implements AppBarLayout.OnOffsetChangedListener {
     OffsetUpdateListener() {
     }
@@ -180,7 +180,7 @@ private class OffsetUpdateListener implements AppBarLayout.OnOffsetChangedListen
                 Math.abs(verticalOffset) / (float) expandRange);
     }
 }
-~~~
+```
 
 可以看出来，有滑动回调的时候，会遍历所有的view。当Child的LayoutParams的mCollapseMode为PIN的时候会将child往返方向滚动同样的距离，从而可以实现让Child定住的效果。当mCollapseMode为PARALLAX时候，会将child往反方向滚动系数为mParallaxMult的移动距离，从而实现了视觉差。
 
@@ -192,7 +192,7 @@ private class OffsetUpdateListener implements AppBarLayout.OnOffsetChangedListen
 
 contentScrim会刚刚好盖住Toolbar后面的所有的View，是如果做到的呢？其实很简单。在CollapsingToolbarLayout执行drawChild的时候，它才会画contentScrim。实现如下：
 
-~~~Java
+```java
 @Override
 protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
     // This is a little weird. Our scrim needs to be behind the Toolbar (if it is present),
@@ -206,12 +206,12 @@ protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
     }
     return super.drawChild(canvas, child, drawingTime) || invalidated;
 }
-~~~
+```
 可以看到如果当前的child是Toolbar它就会画mContentScrim。那么问题来了，如果没有Toolbar做何解呢？
 
 接着往下看：
 
-~~~Java
+```java
 @Override
 public void draw(Canvas canvas) {
     super.draw(canvas);
@@ -225,7 +225,7 @@ public void draw(Canvas canvas) {
     }
     ...
 }
-~~~
+```
 
 注释也说得很明白。也就是说如果没有Toolbar作为CollapsingToolbarLayout的子view，那么mContentScrim会盖住所有的子View。
 

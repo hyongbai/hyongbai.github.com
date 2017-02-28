@@ -24,7 +24,7 @@ Android Studio越来越好用了，以至于本来用的IntelliJ都觉得不够�
 
 - 第三步，打开`build.gradle`并添加如下内容:<br/-
 
-~~~groovy
+```groovy
 buildscript {
     repositories {
         jcenter()
@@ -80,7 +80,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
-~~~
+```
 
 - 第四步，根据自己的项目情况将`builder.gradle`中的`applicationId`,`testApplicationId`等更改成自己所需要的。
 
@@ -88,7 +88,7 @@ dependencies {
 
 需要注意的是，记得在`.gitignore`里面添加如下内容以免给别人带来不必要的麻烦:<br/-
 
-~~~yml
+```yml
 .gradle
 build/
  
@@ -97,4 +97,4 @@ gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
-~~~
+```

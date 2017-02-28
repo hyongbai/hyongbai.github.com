@@ -23,12 +23,12 @@ Android中也可以通过利用代码来搞定是图片变成另外一种颜色�
 
 ### SetTint
 
-~~~ java
+```java
 BitmapDrawable drawable = new BitmapDrawable(bitmap);
 drawable.setTintMode(PorterDuff.Mode.SRC_ATOP);
 drawable.set(Color.RED);
 //drawable.setTintList(colorStateList);
-~~~
+```
 
 其中通过setTint来设置颜色(也可以通过setTintList来设置colorStateList), 通过setTintMode来设置转换模式(PorterDuff.Mode对着应16种模式)。在这里我使用的是PorterDuff.Mode.SRC_ATOP。
 
@@ -41,22 +41,22 @@ drawable.set(Color.RED);
 
 其实查看下BitmapDrawable的源码就可以知道在`setTint`的时候`Drawable`里面调用了`setTintList(ColorStateList.valueOf(tint))`,再打开`BitmapDrawable.setTintList`就可以看到如下:
 
-~~~java
+```java
 @Override
 public void setTintList(ColorStateList tint) {
     mBitmapState.mTint = tint;
     mTintFilter = updateTintFilter(mTintFilter, tint, mBitmapState.mTintMode);
     invalidateSelf();
 }
-~~~
+```
 
 其中`mTintFilter`就是一个`PorterDuffColorFilter`，因此我们可以直接通过设置`ColorFilter`即可完成 setTint 的操作。方法很简单:
 
-~~~java
+```java
 PorterDuffColorFilter filter = new PorterDuffColorFilter(color, mode);
 Drawable drawable = getDrawable(R.mipmap.ic_launcher);
 drawable.setColorFilter(filter);
-~~~
+```
 
 优点是在低于lollipop的Android版本上面也可以运行，且只要是Drawable都可以支持。但是还不能支持`ColorStateList`
 
