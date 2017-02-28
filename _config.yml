@@ -3,11 +3,11 @@ title: yourbay.me
 email: hyongbai@q-supereme.com
 description: 'Copyright © @hyongbai'
 url: "http://yourbay.me" # the base hostname & protocol for your site
-twitter_username: hyongbai
-github_username:  hyongbai
 
-markdown_ext:  markdown,mkd,mkdn,md
-permalink: /:categories/:year/:month/:day/:title/
+
+# ---------------- #
+#      social      #
+# ---------------- #
 name: Hyongbai(Ram Han)
 author: Hyongbai(Ram Han)
 email: hyongbai@gmail.com
@@ -16,12 +16,26 @@ baidu: 3234957
 weibo: 1854281601
 github: hyongbai
 paginate: 20
+twitter_username: hyongbai
+github_username:  hyongbai
 
 # Build settings
+# ---------------- #
+#      Jekyll      #
+# ---------------- #
+markdown_ext:  markdown,mkd,mkdn,md
+permalink: /:categories/:year/:month/:day/:title/
 sass:
   sass_dir: _sass
   style: :compressed
-gems: 
-  - jekyll-paginate
 markdown: kramdown # [ maruku | rdiscount | kramdown | redcarpet ]
 highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+gems: 
+  - jekyll-paginate
+  - rouge
+
+# Highlight create by rouge
+# rougify style github > abc.css
