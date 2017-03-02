@@ -5,7 +5,7 @@ category: all-about-tech
 tags:
  - Design
  - Android
-date: 2017-02-27 04:11:00+00:00
+date: 2017-02-28 14:11:00+00:00
 ---
 
 ## CollapsingToolbarLayout
@@ -14,7 +14,7 @@ date: 2017-02-27 04:11:00+00:00
 
 #### expandedTitleMarginStart
 
-表示【展开】状态下Title左边的Margin。同理还有`expandedTitleMarginEnd` `expandedTitleMarginTop` `expandedTitleMarginBottom`等。看名字应该就知道其意义了，不多介绍。默认值都是`0`
+表示【展开】状态下Title左边(LTR)的Margin。同理还有`expandedTitleMarginEnd` `expandedTitleMarginTop` `expandedTitleMarginBottom`等。看名字应该就知道其意义了，不多介绍。默认值都是`0`
 
 ```java
  mExpandedMarginStart = mExpandedMarginTop = mExpandedMarginEnd = mExpandedMarginBottom = a.getDimensionPixelSize(R.styleable.CollapsingToolbarLayout_expandedTitleMargin, 0);
