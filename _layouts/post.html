@@ -9,6 +9,10 @@ layout: default
   <article class="post-content">
 
     {{ content }}
+
+    By <a href="http://weibo.com/hyongbai">@hyongbai</a> :)
+
+    <i>共{{ content | strip_html | strip_newlines | size }}个字</i>
   </article>
 
 </div>
