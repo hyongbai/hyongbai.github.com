@@ -5,6 +5,9 @@ description: 'Copyright © @hyongbai'
 url: "http://yourbay.me" # the base hostname & protocol for your site
 
 
+future: true
+timezone: Asia/Shanghai
+
 # ---------------- #
 #      social      #
 # ---------------- #
