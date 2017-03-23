@@ -166,7 +166,7 @@ protected SubscriberMethod createSubscriberMethod(String methodName, Class<?> ev
 }
 ```
 
-这里用到了上面的`SubscriberMethodInfo[]`函数。然后通过反射拿到对应的订阅函数。也就是说还是会通过反射。但是不用遍历class里面的每一个`DeclaredMethod`，可以减少很多系统开销。但是之后的subscribe和post等也是通过原来的方式调用。
+这里用到了上面的`SubscriberMethodInfo[]`函数。然后通过反射拿到对应的订阅函数。也就是说还是会通过反射。但是不用遍历class里面的每一个`DeclaredMethod`，以及去掉获取`Annotation(Subscribe.class)`和`ParameterTypes`的开销，这样可以减少很多系统开销。但是之后的subscribe和post等也是通过原来的方式调用。
 
 至于EventAnnoIndex是如何生成的，可以去看看[https://github.com/greenrobot/EventBus/tree/master/EventBusAnnotationProcessor](https://github.com/greenrobot/EventBus/tree/master/EventBusAnnotationProcessor)里面实现，简单来说就是Ide编译的时候会调用`EventBusAnnotationProcessor`里面的`process`方法，在这里将所有的文件过一遍，然后写入到index里面。类似于ButterKnifeAnnotationProcesser。
 
