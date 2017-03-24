@@ -10,9 +10,13 @@ layout: default
 
     {{ content }}
 
-    By <a href="http://weibo.com/hyongbai">@hyongbai</a> :)
+	<p/>
 
-    <i>共{{ content | strip_html | strip_newlines | size }}个字</i>
+    By <a href="http://weibo.com/hyongbai">@hyongbai</a> <i>共{{ content | strip_html | strip_newlines | size }}个字</i>
+
+    <p/>
+
+    本文链接 <a href="{{site.url}}{{page.url}}" >{{site.url}}{{page.url}}</a>
   </article>
 
 </div>

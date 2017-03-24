@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "EventBus性能优化"
+title: "EventBus3.0的性能优化"
 category: all-about-tech
 tags: -[Android] -[EventBus] -[Annotation]
 date: 2017-03-23 13:21:57+00:00
