@@ -65,7 +65,7 @@ private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCa
 
 继续看代码，可以发现只有在ResourcesImpl的startPreloading方法里面才会将mPreloading设置为TRUE。在stopPreloading里面重新设置为FALSE。
 
-而这两个方法是在Zygote启动的时候才会被调用。那么我们去到Zygote中调用的地方看看。
+而这两个方法是在Zygote启动的时候才会被调用。那么我们去到ZygoteInit中调用的地方看看。
 
 ```java
 //ZygoteInit中
