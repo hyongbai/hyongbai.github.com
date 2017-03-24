@@ -2,8 +2,8 @@
 layout: post
 title: "OkHttp - 基本使用"
 category: all-about-tech
-tags: -[square] -[okhttp]
-date: 2016-09-25 00:39:57+00:00
+tags: -[Square] -[Okhttp] -[Android]
+date: 2017-03-24 13:39:57+00:00
 ---
 
 ## 关于
@@ -14,15 +14,15 @@ balababala(http)
 
 - 引入
 
-在`build.gradle`的dependencies中引入`'com.squareup.okhttp3:okhttp:3.4.1'`(当前16年9月最新版是3.4.1)，即可添加OKHttp依赖。
+在`build.gradle`的dependencies中引入`'com.squareup.okhttp3:okhttp:3.6.0'`(目前最新版是3.6)，即可添加OKHttp依赖。
 
 ```groovy
-compile 'com.squareup.okhttp3:okhttp:3.4.1'
+compile 'com.squareup.okhttp3:okhttp:3.6.0'
 ```
 
 - 全局OkHttpClient
 
-比如在Application中创建一个static的OkHttpClient或者在自己的OkHttpManager单例中创建一个，留意复用。而不必到处创建对象，也方便管理。
+比如在Application中创建一个static的OkHttpClient或者在自己的OkHttpManager单例中创建一个，留以复用。而不必到处创建对象，也方便管理。
 
 从源码的可以看到OkHttpClient支持两种方式创建。如下:
 
@@ -45,6 +45,8 @@ public final OkHttpClient client = new OkHttpClient.Builder()
 貌似不太一样，其实`new OkHttpClient()`的时候调用的是`new OkHttpClient(new Builder())`, 也就是说默认会帮你配置一个`Builder`。根据自己的业务需要灵活配置。
 
 需要注意的是：这些配置都是final的大多是不可重新设置的。其中`protocols`和`networkInterceptors`是immutable的。也就是说build完成之后就不可以更改的。其他对象参见其具体实现。
+
+如下是Builder中可以配置的信息:
 
 ```java
   final Dispatcher dispatcher;
