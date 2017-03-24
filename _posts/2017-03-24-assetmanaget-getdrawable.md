@@ -3,7 +3,7 @@ layout: post
 title: "Resource通过resId获取Drawable的流程"
 category: all-about-tech
 tags: -[Android] -[Resource] -[AssetManager]
-date: 2017-03-24 14:55:57+00:00
+date: 2017-03-24 16:00:57+00:00
 ---
 
 今天被问到，Android是怎么做到通过ResId获取Drawable的。以前看过，但是记不清楚了。
@@ -38,7 +38,7 @@ public Drawable getDrawable(@DrawableRes int id, @Nullable Theme theme)
 
 我们可以看到其实是通过`ResourcesImpl`来实现的。这段代码首先通过`impl.getValue(id, value, true)`拿到了一个`TypedValue`, 这个过程是在AssertManager里面通过底层实现的。这里拿到了TypedValue，主要包含了:
 
-- string : 图片的完整路径，比如“res/drawable-xhdpi-v4/ic_launcher.png”
+- string : 图片的完整路径，比如“res/drawable-xhdpi-v4/ic_launcher.png”(这里描述不准确，当type为String的时候string会String值。这里仅仅说type为Drawable的时候)
 - assetCookie : 这个貌似是给底层使用的，用来标记资源。
 - type : int表示资源的类型，比如是图片还是Layout还是drawable等等，TypeValue里面会列出每个值对应的意思。后面会用到它来区别是不是ColorDrawable。
 - data : 数据，如果是ColorDrawable的话，它表示对应的颜色值。
@@ -307,10 +307,317 @@ public Drawable inflateFromXml(@NonNull String name, @NonNull XmlPullParser pars
 ```
 其中inflateFromTag主要是通过name生成对应的Drawable对象(空的)。
 
+完整的列表如下：
+
+```java
+private Drawable inflateFromTag(@NonNull String name) {
+    switch (name) {
+        case "selector":
+            return new StateListDrawable();
+        case "animated-selector":
+            return new AnimatedStateListDrawable();
+        case "level-list":
+            return new LevelListDrawable();
+        case "layer-list":
+            return new LayerDrawable();
+        case "transition":
+            return new TransitionDrawable();
+        case "ripple":
+            return new RippleDrawable();
+        case "color":
+            return new ColorDrawable();
+        case "shape":
+            return new GradientDrawable();
+        case "vector":
+            return new VectorDrawable();
+        case "animated-vector":
+            return new AnimatedVectorDrawable();
+        case "scale":
+            return new ScaleDrawable();
+        case "clip":
+            return new ClipDrawable();
+        case "rotate":
+            return new RotateDrawable();
+        case "animated-rotate":
+            return new AnimatedRotateDrawable();
+        case "animation-list":
+            return new AnimationDrawable();
+        case "inset":
+            return new InsetDrawable();
+        case "bitmap":
+            return new BitmapDrawable();
+        case "nine-patch":
+            return new NinePatchDrawable();
+        default:
+            return null;
+    }
+}
+```
+
 然后各个Drawable实例自己去解析里面对应的属性。
 
+我们以BitmapDrawable为例：
 
-#### 加载png文件
+```java
+@Override
+public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+        throws XmlPullParserException, IOException {
+    super.inflate(r, parser, attrs, theme);
+
+    final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.BitmapDrawable);
+    updateStateFromTypedArray(a);
+    verifyRequiredAttributes(a);
+    a.recycle();
+
+    // Update local properties.
+    updateLocalState(r);
+}
+```
+
+其中updateStateFromTypedArray是核心的代码，这里完成了从xml文件中读取各种属性。其中最主要的是获取里面的src, 具体如下：
+
+```java
+private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
+    //...省略
+    final int srcResId = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
+    if (srcResId != 0) {
+        final Bitmap bitmap = BitmapFactory.decodeResource(r, srcResId);
+        if (bitmap == null) {
+            throw new XmlPullParserException(a.getPositionDescription() +
+                    ": <bitmap> requires a valid 'src' attribute");
+        }
+
+        state.mBitmap = bitmap;
+    }
+    //...省略
+}
+```
+
+继续看，貌似又是拿到一个resId，然后继续用这个resId，去获取对应的bitmap。这里其实跟后面直接加载图片就会有交集了。
+
+继续看:
+
+```java
+//BitmapFactory中
+public static Bitmap decodeResource(Resources res, int id, Options opts) {
+    Bitmap bm = null;
+    InputStream is = null; 
+    
+    try {
+        final TypedValue value = new TypedValue();
+        is = res.openRawResource(id, value);
+
+        bm = decodeResourceStream(res, value, is, null, opts);
+    } catch (Exception e) {
+        /*  do nothing.
+            If the exception happened on open, bm will be null.
+            If it happened on close, bm is still valid.
+        */
+    } finally {
+        try {
+            if (is != null) is.close();
+        } catch (IOException e) {
+            // Ignore
+        }
+    }
+
+    if (bm == null && opts != null && opts.inBitmap != null) {
+        throw new IllegalArgumentException("Problem decoding into existing bitmap");
+    }
+
+    return bm;
+}
+
+// Resources中
+
+public InputStream openRawResource(@RawRes int id, TypedValue value)
+        throws NotFoundException {
+    return mResourcesImpl.openRawResource(id, value);
+}
+
+//ResoucesImpl中
+InputStream openRawResource(@RawRes int id, TypedValue value) throws NotFoundException {
+    getValue(id, value, true);
+    try {
+        return mAssets.openNonAsset(value.assetCookie, value.string.toString(),
+                AssetManager.ACCESS_STREAMING);
+    } catch (Exception e) {
+        // Note: value.string might be null
+        NotFoundException rnf = new NotFoundException("File "
+                + (value.string == null ? "(null)" : value.string.toString())
+                + " from drawable resource ID #0x" + Integer.toHexString(id));
+        rnf.initCause(e);
+        throw rnf;
+    }
+}
+```
+
+看到最后又通过AssetManager调用`InputStream openNonAsset(int cookie, String fileName, int accessMode)`返回一个InputStream，之后BitmapFactory读取这个InputStream并Decode成bitmap。
+
+但是，openNonAsset的实现不打算继续将下去了。因为下面加载图片资源的时候也会用到。
+
+#### 加载图片资源
+
+上面如果缓存中以及preload中都没有发现缓存过的话，会跟上面加载BitmapDrawable一样，调用openNonAsset拿到一个InputStream实例。看下面的具体实现就可以知道，其实这是一个AssetInputStream的对象。
+
+```java
+public final InputStream openNonAsset(int cookie, String fileName, int accessMode)
+    throws IOException {
+    synchronized (this) {
+        if (!mOpen) {
+            throw new RuntimeException("Assetmanager has been closed");
+        }
+        long asset = openNonAssetNative(cookie, fileName, accessMode);
+        if (asset != 0) {
+            AssetInputStream res = new AssetInputStream(asset);
+            incRefsLocked(res.hashCode());
+            return res;
+        }
+    }
+    throw new FileNotFoundException("Asset absolute file: " + fileName);
+}
+```
+
+其中openNonAssetNative是一个native函数，底层处理完之后返回一个内存地址。然后将这个地址传递给。生成一个InputStream对象。
+
+```java
+public final class AssetInputStream extends InputStream {
+    /**
+     * @hide
+     */
+    public final int getAssetInt() {
+        throw new UnsupportedOperationException();
+    }
+    /**
+     * @hide
+     */
+    public final long getNativeAsset() {
+        return mAsset;
+    }
+    private AssetInputStream(long asset)
+    {
+        mAsset = asset;
+        mLength = getAssetLength(asset);
+    }
+    public final int read() throws IOException {
+        return readAssetChar(mAsset);
+    }
+    public final boolean markSupported() {
+        return true;
+    }
+    public final int available() throws IOException {
+        long len = getAssetRemainingLength(mAsset);
+        return len > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)len;
+    }
+    public final void close() throws IOException {
+        synchronized (AssetManager.this) {
+            if (mAsset != 0) {
+                destroyAsset(mAsset);
+                mAsset = 0;
+                decRefsLocked(hashCode());
+            }
+        }
+    }
+    public final void mark(int readlimit) {
+        mMarkPos = seekAsset(mAsset, 0, 0);
+    }
+    public final void reset() throws IOException {
+        seekAsset(mAsset, mMarkPos, -1);
+    }
+    public final int read(byte[] b) throws IOException {
+        return readAsset(mAsset, b, 0, b.length);
+    }
+    public final int read(byte[] b, int off, int len) throws IOException {
+        return readAsset(mAsset, b, off, len);
+    }
+    public final long skip(long n) throws IOException {
+        long pos = seekAsset(mAsset, 0, 0);
+        if ((pos+n) > mLength) {
+            n = mLength-pos;
+        }
+        if (n > 0) {
+            seekAsset(mAsset, n, 0);
+        }
+        return n;
+    }
+
+    protected void finalize() throws Throwable
+    {
+        close();
+    }
+
+    private long mAsset;
+    private long mLength;
+    private long mMarkPos;
+}
+```
+
+可以看到当需要读取数据的时候，通过这个内存地址调用底层数据返回即可。但是我拿到的其实是一个Drawable对象啊。继续看BitmapFactory的loadDrawableForCookie里面关于图片的加载。接下来会使用刚才拿到的InputStream调用Drawable里面的createFromResourceStream生成Drawable。
+
+看源码:
+
+```java
+//Drawable中
+public static Drawable createFromResourceStream(Resources res, TypedValue value,
+        InputStream is, String srcName, BitmapFactory.Options opts) {
+    if (is == null) {
+        return null;
+    }
+
+    /*  ugh. The decodeStream contract is that we have already allocated
+        the pad rect, but if the bitmap does not had a ninepatch chunk,
+        then the pad will be ignored. If we could change this to lazily
+        alloc/assign the rect, we could avoid the GC churn of making new
+        Rects only to drop them on the floor.
+    */
+    Rect pad = new Rect();
+
+    // Special stuff for compatibility mode: if the target density is not
+    // the same as the display density, but the resource -is- the same as
+    // the display density, then don't scale it down to the target density.
+    // This allows us to load the system's density-correct resources into
+    // an application in compatibility mode, without scaling those down
+    // to the compatibility density only to have them scaled back up when
+    // drawn to the screen.
+    if (opts == null) opts = new BitmapFactory.Options();
+    opts.inScreenDensity = Drawable.resolveDensity(res, 0);
+    Bitmap  bm = BitmapFactory.decodeResourceStream(res, value, is, pad, opts);
+    if (bm != null) {
+        byte[] np = bm.getNinePatchChunk();
+        if (np == null || !NinePatch.isNinePatchChunk(np)) {
+            np = null;
+            pad = null;
+        }
+
+        final Rect opticalInsets = new Rect();
+        bm.getOpticalInsets(opticalInsets);
+        return drawableFromBitmap(res, bm, np, pad, opticalInsets, srcName);
+    }
+    return null;
+}
+
+private static Drawable drawableFromBitmap(Resources res, Bitmap bm, byte[] np,
+        Rect pad, Rect layoutBounds, String srcName) {
+
+    if (np != null) {
+        return new NinePatchDrawable(res, bm, np, pad, layoutBounds, srcName);
+    }
+
+    return new BitmapDrawable(res, bm);
+}
+```
+
+这里其实就是通过将前面的InputStream解码生成bitmap对象。不过，这里会查看一下文件到底是不是`.9.png`文件，如果存在NinePatchChunk则生成NinePatchDrawable，否则(又)生成一个BitmapDrawable。
+
+文件加载完了之后会放到前面所有的caches中，留着下次使用。
+
+#### 预加载逻辑
 
 
--未完待续-
+这部分逻辑其实可以略过。应该加载的过程与上面是一模一样的。想看的可以移步到 [系统资源预加载的来龙去脉]({%  post_url 2017-03-25-resources-preloading %})
+
+## 总结
+
+其实Drawable资源的整个加载流程很清晰：读缓存，读预加载，是否是ColorDrawable，处理xml(读取文件流，解析，生成对应对象，读取属性，填充)，处理图片(通过底层读取文件流，解析Bitmap，生成Drawable)
+
+注：其中底层的实现本文无涉及。

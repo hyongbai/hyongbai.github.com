@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "OkHttp - 基本使用"
+title: "OkHttp使用入门"
 category: all-about-tech
 tags: -[Square] -[Okhttp] -[Android]
 date: 2017-03-24 13:39:57+00:00
