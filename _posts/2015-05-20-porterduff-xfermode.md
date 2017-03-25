@@ -28,12 +28,7 @@ Xfermode有三个子类 :
 
 
 
-首先看一下效果图(来自ApiDemos/Graphics/XferModes)
-
-![image](http://img.blog.csdn.net/20130828212947609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdDEyeDM0NTY=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)                                                                  
-
-
-从上面我们可以看到PorterDuff.Mode为枚举类,一共有16个枚举值:
+PorterDuff.Mode为枚举类,一共有16个枚举值:
 
 > - 1.PorterDuff.Mode.CLEAR:所绘制不会提交到画布上。
 > - 2.PorterDuff.Mode.SRC 显示上层绘制图片
@@ -51,6 +46,4 @@ Xfermode有三个子类 :
 > - 14.PorterDuff.Mode.LIGHTEN 取两图层全部，点亮交集部分颜色
 > - 15.PorterDuff.Mode.MULTIPLY 取两图层交集部分叠加后颜色
 > - 16.PorterDuff.Mode.SCREEN 取两图层全部区域，交集部分变为透明色
-
-[原文(待验证)](http://blog.csdn.net/t12x3456/article/details/10432935)
 
