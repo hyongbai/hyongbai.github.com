@@ -16,7 +16,7 @@ Fresco的出现，让我们可以更简单用来加载图片了。本文主要�
 
 Fresco github项目地址：<https://github.com/facebook/fresco/>
 
-本文着重介绍的是Fresco的调用和加载的流程。
+本文着重介绍的是Fresco的调用和加载的流程。各种缓存以及各种策略等未涉及。以后会慢慢整理。
 
 ## 基本使用
 
