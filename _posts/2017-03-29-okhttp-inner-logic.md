@@ -297,10 +297,409 @@ Dispatcher的部分到此就结束了。OkHttp将工作队列以及HOST的同时
 - **RetryAndFollowUpInterceptor** 主要作用就是处理失败之后重试。比如处理未授权、PROXY授权等等。OkHttpClient.Builder中的proxyAuthenticator还有authenticator等都会在这里被调用。Chain里面的StreamAllocation在这里开始实例化，前面都是null。
 - **BridgeInterceptor** 字面意思是桥梁连接应用和网络。主要会完善(添加)请求的Header、处理cookie、自动解压Gzip等等。
 - **CacheInterceptor** 主要作用是缓存Response。官方推荐在OkHttpClient.Builder中使用`okhttp3.Cache`。
-- **ConnectInterceptor** 主要是生成网络连接。调用StreamAllocation.newStream。分配一个复用的Connection。已经确定使用http1x还是http2x(HTTP/2 and SPDY)协议。
-- **CallServerInterceptor** 请求服务器。与服务器进行交互。
+- **ConnectInterceptor** 主要是生成网络连接。调用StreamAllocation.newStream，分配一个复用的Connection。然后以HttpStream和RealConnection的形式交给下一个Interceptor(即CallServerInterceptor)。其中在HttpStream中来确定使用http1x还是HTTP/2x(HTTP/2 and SPDY)协议。
+- **CallServerInterceptor** 请求服务器。与服务器进行交互。获取数据并且封装起来返回给ConnectInterceptor。然后逐级分发回去。最后getResponseWithInterceptorChain接受数据，返回给用户。
+
+其实这中设计思路有点类似Fresco中的Pipeline。知道Fesco的应该知道它的Producer的实现逻辑就是一条一条连通着的管道，可以截流上游封装完之后传递给下游，也可以直接截断上游从自己的缓存策略中直接给下游数据。这里的Interceptor也是一样，比如CacheInterceptor。也可以自己定义Intercepter截断整个连接通路。
 
 ## 连接复用
+
+大家可能都知道OkHttp支持连接复用。但是传说中的连接复用是如何实现的呢？怎样释放的呢？
+
+在上面我们提到ConnectInterceptor所做的事情就是为CallServerInterceptor准备好请求服务器所需要的HttpStream、RealConnection等。
+
+好了背景交待好了之后我们来分析ConnectInterceptor的实现:
+
+```java
+  @Override public Response intercept(Chain chain) throws IOException {
+    RealInterceptorChain realChain = (RealInterceptorChain) chain;
+    Request request = realChain.request();
+    StreamAllocation streamAllocation = realChain.streamAllocation();
+
+    // We need the network to satisfy this request. Possibly for validating a conditional GET.
+    boolean doExtensiveHealthChecks = !request.method().equals("GET");
+    HttpStream httpStream = streamAllocation.newStream(client, doExtensiveHealthChecks);
+    RealConnection connection = streamAllocation.connection();
+
+    return realChain.proceed(request, streamAllocation, httpStream, connection);
+  }
+```
+
+这里面最关键的部分就是`streamAllocation.newStream(client, doExtensiveHealthChecks)`，后面一句拿到的RealConnection也是在这个过程中处理好的，仅仅是执行了一个get行为。
+
+代码继续往下写，思路继续跟着走，我们来到了StreamAllocation。
+
+看看究竟发生了什么神奇的事情:
+
+```java
+  public HttpStream newStream(OkHttpClient client, boolean doExtensiveHealthChecks) {
+    int connectTimeout = client.connectTimeoutMillis();
+    int readTimeout = client.readTimeoutMillis();
+    int writeTimeout = client.writeTimeoutMillis();
+    boolean connectionRetryEnabled = client.retryOnConnectionFailure();
+
+    try {
+      RealConnection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
+          writeTimeout, connectionRetryEnabled, doExtensiveHealthChecks);
+
+      HttpStream resultStream;
+      if (resultConnection.framedConnection != null) {
+        resultStream = new HTTP/2xStream(client, this, resultConnection.framedConnection);
+      } else {
+        resultConnection.socket().setSoTimeout(readTimeout);
+        resultConnection.source.timeout().timeout(readTimeout, MILLISECONDS);
+        resultConnection.sink.timeout().timeout(writeTimeout, MILLISECONDS);
+        resultStream = new Http1xStream(
+            client, this, resultConnection.source, resultConnection.sink);
+      }
+
+      synchronized (connectionPool) {
+        stream = resultStream;
+        return resultStream;
+      }
+    } catch (IOException e) {
+      throw new RouteException(e);
+    }
+  }
+```
+
+这里其实分为两部分。一部分获取到RealConnection，一部分生成HttpStream。后者是根据前者是不是存在framedConnection，来判断使用Http1x还是HTTP/2x。如果存在framedConnection，那么使用的就是HTTP/2x，因为frame是HTTP/2、SPDY里面很重要的一个元素。我们先抛弃1.x和2的实现部分，主要来看看RealConnection是如何拿到的。
+
+```java
+  private RealConnection findHealthyConnection(int connectTimeout, int readTimeout,
+      int writeTimeout, boolean connectionRetryEnabled, boolean doExtensiveHealthChecks)
+      throws IOException {
+    while (true) {
+      RealConnection candidate = findConnection(connectTimeout, readTimeout, writeTimeout,
+          connectionRetryEnabled);
+
+      // If this is a brand new connection, we can skip the extensive health checks.
+      synchronized (connectionPool) {
+        if (candidate.successCount == 0) {
+          return candidate;
+        }
+      }
+
+      // Do a (potentially slow) check to confirm that the pooled connection is still good. If it
+      // isn't, take it out of the pool and start again.
+      if (!candidate.isHealthy(doExtensiveHealthChecks)) {
+        noNewStreams();
+        continue;
+      }
+
+      return candidate;
+    }
+  }
+```
+
+上面代码可以发现RealConnection其实主要是通过`findConnection`拿到，接着会检测这个Connection是否有效，如果有效则返回。继续通过isHealthy是否有效，有效则使用。无效则会重新调用`findConnection`重新获取，并且将其标记为noNewFrame。这个`noNewFrame`的主要意思为无法进行读写操作了。
+
+看一下isHealthy的实现：
+
+```java
+  /** Returns true if this connection is ready to host new streams. */
+  public boolean isHealthy(boolean doExtensiveChecks) {
+    if (socket.isClosed() || socket.isInputShutdown() || socket.isOutputShutdown()) {
+      return false;
+    }
+
+    if (framedConnection != null) {
+      return true; // TODO: check framedConnection.shutdown.
+    }
+
+    if (doExtensiveChecks) {
+      try {
+        int readTimeout = socket.getSoTimeout();
+        try {
+          socket.setSoTimeout(1);
+          if (source.exhausted()) {
+            return false; // Stream is exhausted; socket is closed.
+          }
+          return true;
+        } finally {
+          socket.setSoTimeout(readTimeout);
+        }
+      } catch (SocketTimeoutException ignored) {
+        // Read timed out; socket is good.
+      } catch (IOException e) {
+        return false; // Couldn't read; socket is closed.
+      }
+    }
+
+    return true;
+  }
+```
+
+可以看到当socket关闭或者输入/输入流被关闭或者source(类似InputStream)进入exhausted状态都认为是不健康的。有一种状态。都标记为noNewFrame。此时这个Connection将不会被复用了。接下来会讲为什么不会被复用。
+
+差不多了解了noNewFrame之后我们回到`findConnection`里面去看看如何拿到Conection的。
+
+```java
+//StreamAllocation.java
+  private RealConnection findConnection(int connectTimeout, int readTimeout, int writeTimeout,
+      boolean connectionRetryEnabled) throws IOException {
+    Route selectedRoute;
+    synchronized (connectionPool) {
+      if (released) throw new IllegalStateException("released");
+      if (stream != null) throw new IllegalStateException("stream != null");
+      if (canceled) throw new IOException("Canceled");
+
+      RealConnection allocatedConnection = this.connection;
+      if (allocatedConnection != null && !allocatedConnection.noNewStreams) {
+        return allocatedConnection;
+      }
+
+      // Attempt to get a connection from the pool.
+      RealConnection pooledConnection = Internal.instance.get(connectionPool, address, this);
+      if (pooledConnection != null) {
+        this.connection = pooledConnection;
+        return pooledConnection;
+      }
+
+      selectedRoute = route;
+    }
+
+    if (selectedRoute == null) {
+      selectedRoute = routeSelector.next();
+      synchronized (connectionPool) {
+        route = selectedRoute;
+        refusedStreamCount = 0;
+      }
+    }
+    RealConnection newConnection = new RealConnection(selectedRoute);
+    acquire(newConnection);
+
+    synchronized (connectionPool) {
+      Internal.instance.put(connectionPool, newConnection);
+      this.connection = newConnection;
+      if (canceled) throw new IOException("Canceled");
+    }
+
+    newConnection.connect(connectTimeout, readTimeout, writeTimeout, address.connectionSpecs(),
+        connectionRetryEnabled);
+    routeDatabase().connected(newConnection.route());
+
+    return newConnection;
+  }
+```
+
+首先它会检查自己的状态是不是有效的，如果released/canceled或者stream!=null的时候都会抛出异常结束请求，如果connection不为空并且没有标记为noNewFrame的话就直接使用当前的connection，那么问题来了。这个connection一开始不应该是空的吗？还记得上面说的RetryAndFollewUpInterceptor吗，我们知道StreamAllaction是在那里生成的，痛失那里会做不断重试，只要followUp里面的host/post/scheme不变的话，就会复用一开始的StreamAllaction对象。如果前次已经生成了Connection并且有效的话，为什么还要新的呢？这就是connection这个字段的由来。
+
+
+接着，它会去使用address去ConnecetionPool去取一个可复用的Connection。看看是怎么获取的：
+
+```java
+//ConnecetionPool.java
+  RealConnection get(Address address, StreamAllocation streamAllocation) {
+    assert (Thread.holdsLock(this));
+    for (RealConnection connection : connections) {
+      if (connection.allocations.size() < connection.allocationLimit
+          && address.equals(connection.route().address)
+          && !connection.noNewStreams) {
+        streamAllocation.acquire(connection);
+        return connection;
+      }
+    }
+    return null;
+  }
+```
+这里会去ConnecetionPool持有的连接队列中遍历，寻找一模一样的地址的并且单个连接同时处理的请求数量不超过上限的，且没有被标记为noNewStreams的。如果条件满足，则返回这个Connection，并且将持有这个Connection的StreamAllocation加入到Connection的allocations列表中(弱引用)。可以去看`streamAllocation.acquire(connection)`。【复用上限】的逻辑待会讲，大兄弟咱不着急。
+
+回到StreamAllocation。如果发现池子里面有有效的Connection的话，则直接使用。否则，就只能自己创建一个了。
+
+创建的时候我们略过Route的过程。这里直接new一个RealConnection对象。之后做的事前跟前面从连接池（ConnectionPool）的操作一样。让后Connection持有当前的StreamAllocation对象。然后把当前Connection放入到连接池里面留给缓存待用。到这里Connection的复用逻辑基本就清晰了。【连接释放】先不说。
+
+由于新创建的Connection并没有连接到服务器，如果此时直接返回的话必然导致isHealthy无法通过。所以在返回之前有必要先连接服务器。不过连接的事情，会放到网络请求的部分去讲。
+
 ## 请求网络
 
-未完待续
+上面我们留下了RealConnection是如何连接的问题。接下来就讲讲是如何跟服务器连接，并且是如何发送请求以及处理数据的。
+
+#### 建立连接
+
+我们知道在StreamAllocation中创建一个新的Connection的时候，需要先建立连接方能交给ServerInterceptor。
+
+那么建立连接的过程是怎么样的呢？
+
+```java
+//RealConnection.java
+  public void connect(int connectTimeout, int readTimeout, int writeTimeout,
+      List<ConnectionSpec> connectionSpecs, boolean connectionRetryEnabled) {
+    if (protocol != null) throw new IllegalStateException("already connected");
+
+    RouteException routeException = null;
+    ConnectionSpecSelector connectionSpecSelector = new ConnectionSpecSelector(connectionSpecs);
+
+    if (route.address().sslSocketFactory() == null) {
+      if (!connectionSpecs.contains(ConnectionSpec.CLEARTEXT)) {
+        throw new RouteException(new UnknownServiceException("CLEARTEXT communication not enabled for client"));
+      }
+      String host = route.address().url().host();
+      if (!Platform.get().isCleartextTrafficPermitted(host)) {
+        throw new RouteException(new UnknownServiceException("CLEARTEXT communication to " + host + " not permitted by network security policy"));
+      }
+    }
+
+    while (protocol == null) {
+      try {
+        if (route.requiresTunnel()) {
+          buildTunneledConnection(connectTimeout, readTimeout, writeTimeout,connectionSpecSelector);
+        } else {
+          buildConnection(connectTimeout, readTimeout, writeTimeout, connectionSpecSelector);
+        }
+      } catch (IOException e) {
+        //...
+        if (!connectionRetryEnabled || !connectionSpecSelector.connectionFailed(e)) {
+          throw routeException;
+        }
+      }
+    }
+  }
+```
+
+其实吧主要逻辑都在while循环当中。会通过Route来确定是不是需要Tunnel(Tunnel大致是HTTP代理Https的一种方式，只需要记得这里需要特殊处理https即可)。所以`buildTunneledConnection`和`buildConnection`不同的地方在于建立socket连接之后是不是需要再创建一个Tunnel。
+
+那就来看看OkHttp里面是如何建立Http连接的吧。
+
+```java
+//RealConnection.java
+  /** Does all the work necessary to build a full HTTP or HTTPS connection on a raw socket. */
+  private void buildConnection(int connectTimeout, int readTimeout, int writeTimeout,
+      ConnectionSpecSelector connectionSpecSelector) throws IOException {
+    connectSocket(connectTimeout, readTimeout);
+    establishProtocol(readTimeout, writeTimeout, connectionSpecSelector);
+  }
+
+  private void connectSocket(int connectTimeout, int readTimeout) throws IOException {
+    Proxy proxy = route.proxy();
+    Address address = route.address();
+
+    rawSocket = proxy.type() == Proxy.Type.DIRECT || proxy.type() == Proxy.Type.HTTP
+        ? address.socketFactory().createSocket()
+        : new Socket(proxy);
+
+    rawSocket.setSoTimeout(readTimeout);
+    try {
+      Platform.get().connectSocket(rawSocket, route.socketAddress(), connectTimeout);
+    } catch (ConnectException e) {
+      throw new ConnectException("Failed to connect to " + route.socketAddress());
+    }
+    source = Okio.buffer(Okio.source(rawSocket));
+    sink = Okio.buffer(Okio.sink(rawSocket));
+  }
+```
+
+这里其实就是通过RouteSelector里面生成的route。创建一个Socket并且创建socket连接。连接成功之后顺便把Socket里面的Input/Output转化成Okio中的Source/Sink。
+
+之后调用establishProtocol确定当前的使用的protocol是http1x还是HTTP/2或者SPDY。这里就提到了上面讲连接复用时提到的单个连接同时处理多个请求的上限了。
+
+#### 多路复用
+
+其实就是多路复用。实现如下:
+
+```java
+//RealConnection.java
+  private void establishProtocol(int readTimeout, int writeTimeout,
+      ConnectionSpecSelector connectionSpecSelector) throws IOException {
+    if (route.address().sslSocketFactory() != null) {
+      connectTls(readTimeout, writeTimeout, connectionSpecSelector);
+    } else {
+      protocol = Protocol.HTTP_1_1;
+      socket = rawSocket;
+    }
+
+    if (protocol == Protocol.SPDY_3 || protocol == Protocol.HTTP_2) {
+      socket.setSoTimeout(0); // Framed connection timeouts are set per-stream.
+
+      FramedConnection framedConnection = new FramedConnection.Builder(true)
+          .socket(socket, route.address().url().host(), source, sink)
+          .protocol(protocol)
+          .listener(this)
+          .build();
+      framedConnection.start();
+
+      // Only assign the framed connection once the preface has been sent successfully.
+      this.allocationLimit = framedConnection.maxConcurrentStreams();
+      this.framedConnection = framedConnection;
+    } else {
+      this.allocationLimit = 1;
+    }
+  }
+```
+可以看到如果当前的网络协议是HTTP/1X的时候为1。其实在这里讨论没啥意义。因为多路复用其实只有在HTTP/2/SPDY出来之后才实现的。HTTP/0.9只能一个连接完成后创建一个新连接不能复用。而HTTP/1x之后添加了Keep-Alive可以将多个请求放进一个连接中，但是只能前面处理完了后面才开始相应。而HTTP/2则将多个请求合并在一起，给每个frame标记然后同时处理就可以拜托1X时代顺序的问题了。
+
+去看到FramedConnection初始化可以看到`peerSettings.set(Settings.MAX_FRAME_SIZE, 0, Http2.INITIAL_MAX_FRAME_SIZE);`对应的值是`0x4000`
+
+#### 发起请求
+上面只是说到了OkHttp如何建立连接。但是到目前为止没有发送任何数据。现在我们可以回到ConnectInterceptor了。
+
+此时ConnectInterceptor将任务通过RealInterceptorChain交给下一个Interceptor了。
+
+```java
+//ConntectInterceptor.java
+realChain.proceed(request, streamAllocation, httpStream, connection)
+```
+
+上面我们知道接下来就是CallServerInterceptor上场来耍了。
+
+```java
+ @Override public Response intercept(Chain chain) throws IOException {
+    HttpStream httpStream = ((RealInterceptorChain) chain).httpStream();
+    StreamAllocation streamAllocation = ((RealInterceptorChain) chain).streamAllocation();
+    Request request = chain.request();
+
+    long sentRequestMillis = System.currentTimeMillis();
+    httpStream.writeRequestHeaders(request);
+
+    if (HttpMethod.permitsRequestBody(request.method()) && request.body() != null) {
+      Sink requestBodyOut = httpStream.createRequestBody(request, request.body().contentLength());
+      BufferedSink bufferedRequestBody = Okio.buffer(requestBodyOut);
+      request.body().writeTo(bufferedRequestBody);
+      bufferedRequestBody.close();
+    }
+
+    httpStream.finishRequest();
+
+    Response response = httpStream.readResponseHeaders()
+        .request(request)
+        .handshake(streamAllocation.connection().handshake())
+        .sentRequestAtMillis(sentRequestMillis)
+        .receivedResponseAtMillis(System.currentTimeMillis())
+        .build();
+
+    if (!forWebSocket || response.code() != 101) {
+      response = response.newBuilder()
+          .body(httpStream.openResponseBody(response))
+          .build();
+    }
+
+    if ("close".equalsIgnoreCase(response.request().header("Connection"))
+        || "close".equalsIgnoreCase(response.header("Connection"))) {
+      streamAllocation.noNewStreams();
+    }
+
+    int code = response.code();
+    if ((code == 204 || code == 205) && response.body().contentLength() > 0) {
+      throw new ProtocolException(
+          "HTTP " + code + " had non-zero Content-Length: " + response.body().contentLength());
+    }
+
+    return response;
+  }
+```
+
+这里的逻辑其实非常之简单了。简而言之只有三个步骤：
+
+- 写Header
+- 写Body
+- 读Response
+
+由于在Socket连接的时候确定了protocol。所以在这里HttpStream使用了对应的HttpStream去实现具体的请求。Http1xStream没什么好说的。Http2xStream里面主要用到了FramedConnection来写入和读取数据。至于协议的实现先不说了。
+
+## 连接释放
+
+### 思考
+
+同时请求两个一模一样的URL时，OkHttp会合并请求吗？
+
+Router、Proxy、DNS
