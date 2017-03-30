@@ -8,6 +8,7 @@ date: 2017-03-29 14:55:57+00:00
 
 前面在[OkHttp使用入门]({% post_url 2017-03-24-okhttp-hello-world %})中讲了，OKHttp的基本使用姿势。接下来将OKHttp的内部实现机制。
 
+注: 本文基于OkHttp3.4.1写
 
 ## Call
 
@@ -696,7 +697,227 @@ realChain.proceed(request, streamAllocation, httpStream, connection)
 
 由于在Socket连接的时候确定了protocol。所以在这里HttpStream使用了对应的HttpStream去实现具体的请求。Http1xStream没什么好说的。Http2xStream里面主要用到了FramedConnection来写入和读取数据。至于协议的实现先不说了。
 
+复杂的逻辑都在HttpStream(Http1xStream/Http2xStream)中。:)
+
 ## 连接释放
+
+
+
+#### 后台扫描
+
+在StreamAllocation我们知道当创建一个新的Connection之后，这个Connection会被放到ConnectionPool中。此时Pool会启动一个扫描的任务。所做的事情就是每个一定时间不断扫描当前的连接池一直到没有连接为止，如果某个连接超过一定时间没被使用并且超过最大idle限制则主动释放之。
+
+```java
+//ConnectionPool.java
+  void put(RealConnection connection) {
+    assert (Thread.holdsLock(this));
+    if (!cleanupRunning) {
+      cleanupRunning = true;
+      executor.execute(cleanupRunnable);
+    }
+    connections.add(connection);
+  }
+```
+这点代码就是先将清理扫描的任务启动，之后将连接放到队列中。那么我们来看是如何清理的。
+
+```java
+  private final Runnable cleanupRunnable = new Runnable() {
+    @Override public void run() {
+      while (true) {
+        long waitNanos = cleanup(System.nanoTime());
+        if (waitNanos == -1) return;
+        if (waitNanos > 0) {
+          long waitMillis = waitNanos / 1000000L;
+          waitNanos -= (waitMillis * 1000000L);
+          synchronized (ConnectionPool.this) {
+            try {
+              ConnectionPool.this.wait(waitMillis, (int) waitNanos);
+            } catch (InterruptedException ignored) {
+            }
+          }
+        }
+      }
+    }
+  };
+```
+
+可以看到只要cleanup返回的等待时间为-1才会主动停止任务。否则会等待唤醒之后继续清理。所以核心的代码还是在`cleanup`中。
+
+```java
+//ConnectionPool.java
+  long cleanup(long now) {
+    int inUseConnectionCount = 0;
+    int idleConnectionCount = 0;
+    RealConnection longestIdleConnection = null;
+    long longestIdleDurationNs = Long.MIN_VALUE;
+
+    // Find either a connection to evict, or the time that the next eviction is due.
+    synchronized (this) {
+      for (Iterator<RealConnection> i = connections.iterator(); i.hasNext(); ) {
+        RealConnection connection = i.next();
+
+        // If the connection is in use, keep searching.
+        if (pruneAndGetAllocationCount(connection, now) > 0) {
+          inUseConnectionCount++;
+          continue;
+        }
+
+        idleConnectionCount++;
+
+        // If the connection is ready to be evicted, we're done.
+        long idleDurationNs = now - connection.idleAtNanos;
+        if (idleDurationNs > longestIdleDurationNs) {
+          longestIdleDurationNs = idleDurationNs;
+          longestIdleConnection = connection;
+        }
+      }
+
+      if (longestIdleDurationNs >= this.keepAliveDurationNs
+          || idleConnectionCount > this.maxIdleConnections) {
+        // We've found a connection to evict. Remove it from the list, then close it below (outside
+        // of the synchronized block).
+        connections.remove(longestIdleConnection);
+      } else if (idleConnectionCount > 0) {
+        // A connection will be ready to evict soon.
+        return keepAliveDurationNs - longestIdleDurationNs;
+      } else if (inUseConnectionCount > 0) {
+        // All connections are in use. It'll be at least the keep alive duration 'til we run again.
+        return keepAliveDurationNs;
+      } else {
+        // No connections, idle or in use.
+        cleanupRunning = false;
+        return -1;
+      }
+    }
+
+    closeQuietly(longestIdleConnection.socket());
+
+    // Cleanup again immediately.
+    return 0;
+  }
+```
+
+这段逻辑主要是通过`pruneAndGetAllocationCount`来断定当前的Connection是不是idle状态。在for循环中会过滤出最大空闲时间以及对应的连接。
+
+- 如果idle的时间超过最大空闲时间或者空闲的连接超过最大空闲数量那么最长空闲连接将会被丢弃，并且立马进入下一次清理。
+- 如果有空闲的连接，则等待keepAliveDurationNs - longestIdleDurationNs之后继续清理。
+- 如果有仍然在使用的连接，那么等等keepAliveDurationNs之后继续清理。
+- 否则直接退出扫描。
+
+其中pruneAndGetAllocationCount里面的逻辑就是查看一个连接被请求(被StreamAllocation持有)的数量。如果为0则认为idle状态。有意思的是如果Connection持有的某一个StreamAllocation引用(WeakReference)被释放掉了的话，这个Connection会被标记为noNewStream。
+
+
+#### 主动释放
+
+当Response被close掉的时候，会调用StreamAllocation里面的streamFinished.
+
+Http1xStream中：
+
+```java
+//Http1xStream.java
+    protected final void endOfInput(boolean reuseConnection) throws IOException {
+      if (state == STATE_CLOSED) return;
+      if (state != STATE_READING_RESPONSE_BODY) throw new IllegalStateException("state: " + state);
+
+      detachTimeout(timeout);
+
+      state = STATE_CLOSED;
+      if (streamAllocation != null) {
+        streamAllocation.streamFinished(!reuseConnection, Http1xStream.this);
+      }
+    }
+  }
+```
+
+Http2xStream中：
+
+```java
+//Http2xStream
+  class StreamFinishingSource extends ForwardingSource {
+    public StreamFinishingSource(Source delegate) {
+      super(delegate);
+    }
+
+    @Override public void close() throws IOException {
+      streamAllocation.streamFinished(false, Http2xStream.this);
+      super.close();
+    }
+  }
+```
+继续看是如何释放的。
+
+```java
+//StreamAllocation.java
+  public void streamFinished(boolean noNewStreams, HttpStream stream) {
+    synchronized (connectionPool) {
+      if (stream == null || stream != this.stream) {
+        throw new IllegalStateException("expected " + this.stream + " but was " + stream);
+      }
+      if (!noNewStreams) {
+        connection.successCount++;
+      }
+    }
+    deallocate(noNewStreams, false, true);
+  }
+  
+    private void deallocate(boolean noNewStreams, boolean released, boolean streamFinished) {
+    RealConnection connectionToClose = null;
+    synchronized (connectionPool) {
+      if (streamFinished) {
+        this.stream = null;
+      }
+      if (released) {
+        this.released = true;
+      }
+      if (connection != null) {
+        if (noNewStreams) {
+          connection.noNewStreams = true;
+        }
+        if (this.stream == null && (this.released || connection.noNewStreams)) {
+          release(connection);
+          if (connection.allocations.isEmpty()) {
+            connection.idleAtNanos = System.nanoTime();
+            if (Internal.instance.connectionBecameIdle(connectionPool, connection)) {
+              connectionToClose = connection;
+            }
+          }
+          connection = null;
+        }
+      }
+    }
+    if (connectionToClose != null) {
+      Util.closeQuietly(connectionToClose.socket());
+    }
+  }
+  
+    /** Remove this allocation from the connection's list of allocations. */
+  private void release(RealConnection connection) {
+    for (int i = 0, size = connection.allocations.size(); i < size; i++) {
+      Reference<StreamAllocation> reference = connection.allocations.get(i);
+      if (reference.get() == this) {
+        connection.allocations.remove(i);
+        return;
+      }
+    }
+    throw new IllegalStateException();
+  }
+```
+
+streamFinished的主要作用是将当前的httpStream释放掉。而released这个参数并没有被标记为true，也就是说如果连接被标记为noNewStream之后那么就会将Connection释放掉。而Http2Stream是不会被标记为noNewStream的，Http1Stream中的只要明确数据没有读完那么即使close也不会被标记为noNewStream。所以其实并不会把StreamAllocation从Connection中移除，因此Connection就一直就不会进入idle状态。那么问题来上面不是说idle一段时间后才会被扫描策略释放，那么idle哪里来?
+
+那么我们的思路就转到StreamAllocation被Release的地方看看。前面讲到在RetryAndFollowUpInterceptor中，会根据Response的状态来判断是不是需要Follower，比如代理、权限等出问题时。但是当一个返回是正常的时候，不会进行FollowUp。此时会调用Release释放。关键代码：
+
+```java
+//RetryAndFollowUpInterceptor.java
+Request followUp = followUpRequest(response);
+if (followUp == null) {
+if (!forWebSocket) {
+  streamAllocation.release();
+}
+return response;
+}
+```
+
 
 ### 思考
 
