@@ -251,26 +251,307 @@ Proxy运行的基本逻辑是，当你使用某一个接口时InvocationHandler�
 大概经历了下面几个过程：
 
 - **生成CallAdapter** 这里会先去Retrofit中调用`CallAdapter.Factory`生成一个CallAdapter。CallAdapter的主要目的是实现里面的`adapt`，也就是上面create的代理中返回最终的Call的时调用的接口。主要作用就是让你可以代理OkHttpCall。从而让Retrofit更灵活。
-- **生成Converter** Converter的作用是当获取到ResponseBody之后可以用它来将数据转化成你想要的数据结构，比如我上面就转化成了String。你也可以用Gson来解析之。
-
+- **生成Converter** Converter的作用是当获取到ResponseBody之后可以用它来将数据转化成你想要的数据结构，比如我上面就转化成了String。你也可以用Gson来解析之。主要通过Retrofit中的ConverterFactory实现，过程很简单。
 - **解析MethodAnnotation** 
+通过method.getAnnotations()拿到方法的所有注解。然后用parseMethodAnnotation一个个解析注解。
+
+```java
+//ServiceMethod.java
+    private void parseMethodAnnotation(Annotation annotation) {
+      if (annotation instanceof DELETE) {
+        parseHttpMethodAndPath("DELETE", ((DELETE) annotation).value(), false);
+      } else if (annotation instanceof GET) {
+        parseHttpMethodAndPath("GET", ((GET) annotation).value(), false);
+      } else if (annotation instanceof HEAD) {
+        parseHttpMethodAndPath("HEAD", ((HEAD) annotation).value(), false);
+        if (!Void.class.equals(responseType)) {
+          throw methodError("HEAD method must use Void as response type.");
+        }
+      } else if (annotation instanceof PATCH) {
+        parseHttpMethodAndPath("PATCH", ((PATCH) annotation).value(), true);
+      } else if (annotation instanceof POST) {
+        parseHttpMethodAndPath("POST", ((POST) annotation).value(), true);
+      } else if (annotation instanceof PUT) {
+        parseHttpMethodAndPath("PUT", ((PUT) annotation).value(), true);
+      } else if (annotation instanceof OPTIONS) {
+        parseHttpMethodAndPath("OPTIONS", ((OPTIONS) annotation).value(), false);
+      } else if (annotation instanceof HTTP) {
+        HTTP http = (HTTP) annotation;
+        parseHttpMethodAndPath(http.method(), http.path(), http.hasBody());
+      } else if (annotation instanceof retrofit2.http.Headers) {
+        String[] headersToParse = ((retrofit2.http.Headers) annotation).value();
+        if (headersToParse.length == 0) {
+          throw methodError("@Headers annotation is empty.");
+        }
+        headers = parseHeaders(headersToParse);
+      } else if (annotation instanceof Multipart) {
+        if (isFormEncoded) {
+          throw methodError("Only one encoding annotation is allowed.");
+        }
+        isMultipart = true;
+      } else if (annotation instanceof FormUrlEncoded) {
+        if (isMultipart) {
+          throw methodError("Only one encoding annotation is allowed.");
+        }
+        isFormEncoded = true;
+      }
+    }
+```
+
+可以看到不仅仅是Method还有Headers也是在方法的注解里面实现的。
+
+下面看看Method和Path是如何处理的。
+
+```java
+//ServiceMethod.java
+   private void parseHttpMethodAndPath(String httpMethod, String value, boolean hasBody) {
+      if (this.httpMethod != null) {
+        throw methodError("Only one HTTP method is allowed. Found: %s and %s.",
+            this.httpMethod, httpMethod);
+      }
+      this.httpMethod = httpMethod;
+      this.hasBody = hasBody;
+
+      if (value.isEmpty()) {
+        return;
+      }
+
+      // Get the relative URL path and existing query string, if present.
+      int question = value.indexOf('?');
+      if (question != -1 && question < value.length() - 1) {
+        // Ensure the query string does not have any named parameters.
+        String queryParams = value.substring(question + 1);
+        Matcher queryParamMatcher = PARAM_URL_REGEX.matcher(queryParams);
+        if (queryParamMatcher.find()) {
+          throw methodError("URL query string \"%s\" must not have replace block. "
+              + "For dynamic query parameters use @Query.", queryParams);
+        }
+      }
+
+      this.relativeUrl = value;
+      this.relativeUrlParamNames = parsePathParameters(value);
+    }
+```
+ 
+其实Method主要是外面传过来的，url直接用注解中的value即可。**注意**这里会检查url中是不是有query信息，有则抛出异常。
+
+关于header的处理如下:
+
+```java
+    private Headers parseHeaders(String[] headers) {
+      Headers.Builder builder = new Headers.Builder();
+      for (String header : headers) {
+        int colon = header.indexOf(':');
+        if (colon == -1 || colon == 0 || colon == header.length() - 1) {
+          throw methodError(
+              "@Headers value must be in the form \"Name: Value\". Found: \"%s\"", header);
+        }
+        String headerName = header.substring(0, colon);
+        String headerValue = header.substring(colon + 1).trim();
+        if ("Content-Type".equalsIgnoreCase(headerName)) {
+          MediaType type = MediaType.parse(headerValue);
+          if (type == null) {
+            throw methodError("Malformed content type: %s", headerValue);
+          }
+          contentType = type;
+        } else {
+          builder.add(headerName, headerValue);
+        }
+      }
+      return builder.build();
+    }
+```
+
+Headers对应的value其实是一个String数组。数组的key和value使用":"隔开的。这段代码就是解析KV。
+
 - **解析ParamentAnnotation**
 
-之后创建一个OkHttpCall，并将这个Call使用CallAdapter包裹返回给用户。让用户自己来决定同步或者移步来调用
+这里需要用到parameterTypes数据和parameterAnnotationsArray数组，前者是所有的参数类型的数据，后者是单个参数对应的[多个注解]。这两个数据的长度一一对应。这里逻辑很多。最后生成一个parameterHandler。也是跟前面是对应的。
+
+
+之后创建一个OkHttpCall，并将这个Call使用CallAdapter包裹返回给用户。让用户自己来决定同步或者移步来调用。
 
 ### 处理请求
 
+在动态代理中我们知道生成ServiceMethod之后，会将ServiceMethod和参数一起生成一个OkHttpCall。然后将这个call用CallAdapter一起生成一个新的Call，Retrofit默认生成的Call为`ExecutorCallbackCall`。
 
+所以用户那边拿到的是ExecutorCallbackCall实例。因此对Call的操作的重任都放在了ExecutorCallbackCall身上。
 
-### 接口拓展
+但是翻开ExecutorCallbackCall的源码可以发现：这里面其实就是使用OkHttpCall做代理而已。但是需要说明的是移步请求时回调会被放在callbackExecutor中再次回调给到OkHttpCall.
 
-- **Converter**
-- **Adapter**
+```java
+//ExecutorCallAdapterFactory.java
+    @Override public void enqueue(final Callback<T> callback) {
+      if (callback == null) throw new NullPointerException("callback == null");
+
+      delegate.enqueue(new Callback<T>() {
+        @Override public void onResponse(Call<T> call, final Response<T> response) {
+          callbackExecutor.execute(new Runnable() {
+            @Override public void run() {
+              if (delegate.isCanceled()) {
+                // Emulate OkHttp's behavior of throwing/delivering an IOException on cancellation.
+                callback.onFailure(ExecutorCallbackCall.this, new IOException("Canceled"));
+              } else {
+                callback.onResponse(ExecutorCallbackCall.this, response);
+              }
+            }
+          });
+        }
+
+        @Override public void onFailure(Call<T> call, final Throwable t) {
+          callbackExecutor.execute(new Runnable() {
+            @Override public void run() {
+              callback.onFailure(ExecutorCallbackCall.this, t);
+            }
+          });
+        }
+      });
+    }
+```
+
+所以请求的部分还是要到OkHttpCall中一探究竟。其实它在处理同步和移步是没多大区别，我们就一同步为例吧。
+
+```java
+  @Override public Response<T> execute() throws IOException {
+    okhttp3.Call call;
+
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already executed.");
+      executed = true;
+
+      if (creationFailure != null) {
+        if (creationFailure instanceof IOException) {
+          throw (IOException) creationFailure;
+        } else {
+          throw (RuntimeException) creationFailure;
+        }
+      }
+
+      call = rawCall;
+      if (call == null) {
+        try {
+          call = rawCall = createRawCall();
+        } catch (IOException | RuntimeException e) {
+          creationFailure = e;
+          throw e;
+        }
+      }
+    }
+
+    if (canceled) {
+      call.cancel();
+    }
+
+    return parseResponse(call.execute());
+  }
+```
+
+首先它会再次生成一个新的Call。注意这个Call是okhttp3.Call了，为什么呢？因为接下来的时候就要交给OkHttp处理了。处理完之后的结果会放在parseResponse中做反序列化，使用converter生成我们需要的对象。
+
+下面重点讲讲生成Call的故事。
+
+```java
+  private okhttp3.Call createRawCall() throws IOException {
+    Request request = serviceMethod.toRequest(args);
+    okhttp3.Call call = serviceMethod.callFactory.newCall(request);
+    if (call == null) {
+      throw new NullPointerException("Call.Factory returned null.");
+    }
+    return call;
+  }
+```
+
+首先会使用serviceMethod将我们的参数生成一个Request。然后使用这个这个Request调用Retrofit中的CallFactory生成一个新的okhttp3.Call，还记得前面生成Retrofit时Builder中的client吗，那就是CallFatory。且Retrofit默认的CallFactory是新建一个OkHttpClient。这里接下来就是OkHttp里面的基本使用姿势了。
+
+那么我们来看看这个Request是如何生成的呢？
+
+我们回到ServiceMethod中去看看。
+
+```java
+//ServiceMethod.java
+  /** Builds an HTTP request from method arguments. */
+  Request toRequest(Object... args) throws IOException {
+    RequestBuilder requestBuilder = new RequestBuilder(httpMethod, baseUrl, relativeUrl, headers,
+        contentType, hasBody, isFormEncoded, isMultipart);
+
+    @SuppressWarnings("unchecked") // It is an error to invoke a method with the wrong arg types.
+    ParameterHandler<Object>[] handlers = (ParameterHandler<Object>[]) parameterHandlers;
+
+    int argumentCount = args != null ? args.length : 0;
+    if (argumentCount != handlers.length) {
+      throw new IllegalArgumentException("Argument count (" + argumentCount
+          + ") doesn't match expected count (" + handlers.length + ")");
+    }
+
+    for (int p = 0; p < argumentCount; p++) {
+      handlers[p].apply(requestBuilder, args[p]);
+    }
+
+    return requestBuilder.build();
+  }
+```
+
+首先会用之前解析好的Method，URL，Header等等创建一个RequestBuilder。然后就是将参数注解一个个放到里面去了。很巧妙的一点是，它将参数注解给抽象出一个ParameterHandler。然后将RequestBuilder以参数的形式交给这个ParameterHandler。如果某个注解是处理Body的，那么你就在Body ParameterHandler中实现Body的部分即可。完美解耦了。
+
+以Body为例：
+
+```java
+  static final class Body<T> extends ParameterHandler<T> {
+    private final Converter<T, RequestBody> converter;
+
+    Body(Converter<T, RequestBody> converter) {
+      this.converter = converter;
+    }
+
+    @Override void apply(RequestBuilder builder, T value) {
+      if (value == null) {
+        throw new IllegalArgumentException("Body parameter value must not be null.");
+      }
+      RequestBody body;
+      try {
+        body = converter.convert(value);
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to convert " + value + " to RequestBody", e);
+      }
+      builder.setBody(body);
+    }
+  }
+```
+
+它在解析Body注解的时候build是解析好的`requestBodyConverter`就放入其中了。然后交给这个responseConverter把参数生成对应的RequestBody。就很灵活，从而实现各种各样复杂的行为。
+
+当okhttp3.Call执行完返回Response后，在OkHttpCall中调用parserResponse反序列化结果。
+
+```java
+
+  Response<T> parseResponse(okhttp3.Response rawResponse) throws IOException {
+    ResponseBody rawBody = rawResponse.body();
+    //...省略
+    try {
+      T body = serviceMethod.toResponse(catchingBody);
+      return Response.success(body, rawResponse);
+    } catch (RuntimeException e) {
+      // If the underlying source threw an exception, propagate that rather than indicating it was
+      // a runtime exception.
+      catchingBody.throwIfCaught();
+      throw e;
+    }
+  }
+```
+
+其中`T Body`就是我们在API接口中定义返回的Call中的泛型。反序列化的过程也是在ServiceMethod中处理的。
+
+```java
+//ServiceMethod.java
+  R toResponse(ResponseBody body) throws IOException {
+    return responseConverter.convert(body);
+  }
+```
+
+这里就用到了build ServiceMethod时的responseConverter。
 
 ## 总结
 
 看了Retrofit的实现过程不难发现，它是全程使用了反射。故而如果你对性能上面有严格要求的话还是要谨慎使用。不过，我们是不是可以通过其他方式来降低(消除)这个性能缺陷呢？
 
 比如，在编译的时候提前将Interface给自动实现，这样用户只要就可以脱离Retrofit从而达到目的。
-
--未完待续-
