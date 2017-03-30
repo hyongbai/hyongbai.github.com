@@ -919,8 +919,10 @@ return response;
 ```
 
 
-### 思考
+##思考
 
 同时请求两个一模一样的URL时，OkHttp会合并请求吗？
 
-Router、Proxy、DNS
+HttpUrl是在哪里用的？
+
+Router、Proxy、DNS？
