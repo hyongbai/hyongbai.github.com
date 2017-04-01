@@ -368,6 +368,7 @@ Headers对应的value其实是一个String数组。数组的key和value使用":"
 
 这里需要用到parameterTypes数据和parameterAnnotationsArray数组，前者是所有的参数类型的数据，后者是单个参数对应的[多个注解]。这两个数据的长度一一对应。这里逻辑很多。最后生成一个parameterHandler。也是跟前面是对应的。
 
+注意：虽然Java支持参数多个注解，但是Retrofit自己的注解却只能有一个，否则会抛异常提示:"Multiple Retrofit annotations found, only one allowed."
 
 之后创建一个OkHttpCall，并将这个Call使用CallAdapter包裹返回给用户。让用户自己来决定同步或者移步来调用。
 
