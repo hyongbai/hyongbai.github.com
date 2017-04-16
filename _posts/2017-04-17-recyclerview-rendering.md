@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "RecyclerView绘制流程详解"
+title: "RecyclerView绘制流程"
 category: all-about-tech
 tags: -[Android] -[Support] -[RecyclerView] -[View]
 date: 2017-04-17 00:39:00+00:00
