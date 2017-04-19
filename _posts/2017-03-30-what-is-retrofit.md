@@ -556,3 +556,5 @@ Headers对应的value其实是一个String数组。数组的key和value使用":"
 看了Retrofit的实现过程不难发现，它是全程使用了反射。故而如果你对性能上面有严格要求的话还是要谨慎使用。不过，我们是不是可以通过其他方式来降低(消除)这个性能缺陷呢？
 
 比如，在编译的时候提前将Interface给自动实现，这样用户只要就可以脱离Retrofit从而达到目的。
+
+> 更新：于是我写了一个Greenfit。[使用Greenfit预编译Retrofit]({% post_url 2017-04-18-greenfit %})。
