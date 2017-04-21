@@ -3,7 +3,7 @@ layout: post
 title: "Android(Java)中关于内存管理的知识总结"
 category: all-about-tech
 tags: -[Android] -[Java] -[Memory]
-date: 2017-04-21 10：41:00+00:00
+date: 2017-04-21 10:41:00+00:00
 ---
 
 一直想这里这一块知识，但是一直没有时间整理。最近在回顾这方面的逻辑，所以就基于本人目前阶段的理解，整理了一下，记录一个总结。
