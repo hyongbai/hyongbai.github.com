@@ -557,4 +557,4 @@ Headers对应的value其实是一个String数组。数组的key和value使用":"
 
 比如，在编译的时候提前将Interface给自动实现，这样用户只要就可以脱离Retrofit从而达到目的。
 
-> 更新：于是我写了一个Greenfit。[使用Greenfit预编译Retrofit]({% post_url 2017-04-18-greenfit %})。
+> 更新：于是我写了一个Greenfit。[使用Greenfit预编译Retrofit]。
