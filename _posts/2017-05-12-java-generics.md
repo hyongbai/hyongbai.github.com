@@ -26,7 +26,7 @@ final Object[] aO = aI;
 
 ## 类型擦除
 
-其实泛型是在编译器层面实现的，简单来说就是编译的时候编译器会将泛型给擦除，只留下RawType。比如：List<String>编译后会变成List。
+其实泛型是在编译器层面实现的，简单来说就是编译的时候编译器会将泛型给擦除，只留下RawType。比如：List\<String\>编译后会变成List。
 
 之所以会出现泛型擦除主要原因是泛型是Java1.5之后才出现的，也就是说我们之前写的代码是没法使用的。主要是兼容性方面的考虑，故而编译器编译的时候会进行泛型擦除。
 
@@ -264,6 +264,6 @@ getLowerBounds = null
 > 参考：
 > 
 - <https://segmentfault.com/a/1190000003831229>
-- <https://www.ibm.com/developerworks/cn/java/j-jtp01255.html>
 - <http://www.infoq.com/cn/articles/cf-java-generics>
+- <https://www.ibm.com/developerworks/cn/java/j-jtp01255.html>
 - <http://loveshisong.cn/%E7%BC%96%E7%A8%8B%E6%8A%80%E6%9C%AF/2016-02-16-Type%E8%AF%A6%E8%A7%A3.html>
