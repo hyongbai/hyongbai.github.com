@@ -1,0 +1,1 @@
+../_drafts/2017-07-20-view-pager.md
