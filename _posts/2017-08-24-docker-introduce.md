@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "[Docker]介绍"
-description: "[Docker]介绍"
+title: "Docker-介绍"
+description: "Docker-介绍"
 category: all-about-tech
 tags: [Docker]
 date: 2017-08-25 10:05:57+00:00
@@ -61,14 +61,19 @@ Docker能够给我们带来的便利远远不止于此。
 
 前面在历史的部分简单讲了下Docker目前存在的问题。所以总结下来就是Docker目前可能还不适合用在企业级的环境中。
 
-Docker的安装请移步：【[[Docker]安装]({% post_url 2017-08-24-docker-installation %})】
+Docker的安装请移步：【[Docker-安装]({% post_url 2017-08-24-docker-installation %})】
 
 > 本文是本人基于前人的分享加上个人浅薄的理解创作而成。
 > 下面是部分参考的内容:
 >
 > <http://dockone.io/article/378>
+>
 > <http://www.yunweipai.com/archives/10328.html>
+>
 > <http://www.yunweipai.com/archives/10358.html>
+>
 > <http://www.10tiao.com/html/240/201701/2649256944/1.html>
+>
 > <http://dockerpool.com/static/books/docker_practice/index.html>
+>
 > <http://www.infoq.com/cn/articles/docker-standard-container-execution-engine-runc>
