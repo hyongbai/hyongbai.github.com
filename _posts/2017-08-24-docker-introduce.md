@@ -9,7 +9,7 @@ date: 2017-08-25 10:05:57+00:00
 
 ## 简介
 
-Docker是近年来非常火的一项技术了。各个大厂也纷纷给予docker进行了支持。目前Google/微软/Amazon/阿里等都已支持了docker。
+Docker是近年来非常火的一项技术了。各个大厂也纷纷给予Docker进行了支持。目前Google/微软/Amazon/阿里等都已支持了Docker。
 
 有如此多的支持还是与其高性能以及高便捷性分不开的。我们可以使用Docker快速的部署生产环境，而且迁移/部署其他也十分方便。使用Docker之后你想要出现线上环境和开发环境不同的情况都将会很难。
 
@@ -25,23 +25,23 @@ Whatever，不纠结到底谁是标准谁是标杆，先掌握了使用姿势再
 
 ## 对比
 
-话说在docker出来之前我们习惯于用VM来做"跨平台"的工作，安装vm之后在其上面再安装对应的操作系统。往往会消耗掉大量的内存和存储。从而大大损耗了硬件资源。而Docker与之不同的地方docker不需要这些东西，docker接近于直接使用硬件资源，且不需要用户安装一个完整的操作系统。从这个层面而言，docker做了大大的简化并且带来了性能的大大增进。
+话说在Docker出来之前我们习惯于用VM来做"跨平台"的工作，安装vm之后在其上面再安装对应的操作系统。往往会消耗掉大量的内存和存储。从而大大损耗了硬件资源。而Docker与之不同的地方Docker不需要这些东西，Docker接近于直接使用硬件资源，且不需要用户安装一个完整的操作系统。从这个层面而言，Docker做了大大的简化并且带来了性能的大大增进。
 
-下图是vm和docker之间的架构对比：
+下图是vm和Docker之间的架构对比：
 
 ![](https://insights.sei.cmu.edu/assets/content/VM-Diagram.png)
 
 *(图自cmu)*
 
-因为VM的实现方式，从而导致了VM启动时需要做大量的初始化工作，因而比较耗时。启动速度必然以分钟为单位记。而Docker的启动速度可达到50ms内。按照docker官方的话来说："虚拟机需要数分钟启动，而Docker容器只需要50毫秒"(docker有没有说过这句话真实性有待验证，Whatever)。
+因为VM的实现方式，从而导致了VM启动时需要做大量的初始化工作，因而比较耗时。启动速度必然以分钟为单位记。而Docker的启动速度可达到50ms内。按照Docker官方的话来说："虚拟机需要数分钟启动，而Docker容器只需要50毫秒"(Docker有没有说过这句话真实性有待验证，Whatever)。
 
-甚至有人画了一张图来比较docker和vm的启动速度。对比起来还是十分强烈的。如下：
+甚至有人画了一张图来比较Docker和VM的启动速度。对比起来还是十分强烈的。如下：
 
 ![](https://cdn.edureka.co/blog/wp-content/uploads/2016/10/VM-vs-Docker-What-is-Docker-Container-Edureka-1.png)
 
 *(图自https://www.edureka.co/blog/what-is-docker-container)*
 
-总结，docker相对于VM而言，不论是体积还是启动速度还是可维护性都有碾压性的优势。
+总结，Docker相对于VM而言，不论是体积还是启动速度还是可维护性都有碾压性的优势。
 
 ## 功能
 

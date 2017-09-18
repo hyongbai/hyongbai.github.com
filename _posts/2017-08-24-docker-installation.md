@@ -76,7 +76,7 @@ Windows同理。
 
 #### 免sudo
 
-安装上之后我们可能还需要使用`sudo docker`来使用Docker。因此如果你安装了docker，但又不想每次都使用sudo的话，可以执行如下代码：
+安装上之后我们可能还需要使用`sudo docker`来使用Docker。因此如果你安装了Docker，但又不想每次都使用sudo的话，可以执行如下代码：
 
 ```shell
 sudo groupadd docker && sudo gpasswd -a $USER docker
@@ -84,19 +84,77 @@ sudo groupadd docker && sudo gpasswd -a $USER docker
 
 会自动创建一个名为`docker`用户组，好处在于我们使用docker的时候再也不需要使用sudo开头了。
 
+
+#### START
+
+需要安装machine来管理电脑上面运行的Docker。一台电脑可以运行多Docker。
+
+MAC:
+
+虽然`Docker for mac`使用了HyperV虚拟机，但是创建docker-machine的时候还不支持HyperV，还是需要指定vb。如下：
+
+```shell
+docker-machine create --driver=virtualbox {name}
+```
+
+LINUX:
+
+因为Docker本身是运行在linux内核的，所以不存在driver这个概念。因此直接可以如下方式运行：
+
+```shell
+docker-machine create {name}
+```
+
+WINDOWS:
+
+`Docker for windows` 目前已经支持了hyperv驱动来创建machine了。所以可以使用hyperv：
+
+```shell
+docker-machine create --driver hyperv {name}
+```
+
+创建过程大致如下：
+
+
+```shell
+➜  ~ docker-machine create --driver=virtualbox dev
+Running pre-create checks...
+Creating machine...
+(dev) Copying /Users/ram/.docker/machine/cache/boot2docker.iso to /Users/ram/.docker/machine/machines/dev/boot2docker.iso...
+(dev) Creating VirtualBox VM...
+(dev) Creating SSH key...
+(dev) Starting the VM...
+(dev) Check network to re-create if needed...
+(dev) Found a new host-only adapter: "vboxnet0"
+(dev) Waiting for an IP...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env dev
+```
+
 #### 最后
 
 好了，执行成功之后输入：
 
 ```shell
 ➜  ~ docker -v
-Docker version 1.8.1, build d12ea79
+Docker version 1.12.3, build 6b644ec
 ➜  ~ 
 ```
 
 ## 参考
 
 > <https://yq.aliyun.com/articles/57215/>
+>
+> <https://docs.docker.com/machine/get-started>
 >
 > <https://docs.docker.com/toolbox/toolbox_install_mac/>
 >

@@ -15,7 +15,7 @@ date: 2017-08-30 00:05:57+00:00
 
 #### 命名空间
 
-在下载或者使用镜像的时候，需要告诉docker我们需要谁的、什么样的、啥版本的镜像。比如：ubuntu/ubuntu:14.04，这就代表了Ubuntu公司发行的14.04版的Ubuntu。也就是说镜像的命名空间为`${user}/${name}:${version}`，如果不加版本的话，默认使用的是最新的镜像。这其实只是一种方式。
+在下载或者使用镜像的时候，需要告诉Docker我们需要谁的、什么样的、啥版本的镜像。比如：ubuntu/ubuntu:14.04，这就代表了Ubuntu公司发行的14.04版的Ubuntu。也就是说镜像的命名空间为`${user}/${name}:${version}`，如果不加版本的话，默认使用的是最新的镜像。这其实只是一种方式。
 
 第二种：还是以Ubuntu为例。Docker公司预留了一系列的著名软件名称当做根命名空间，之后Docker将这些交给第三方维护(一般是软件的发行商)。这种情况下我们就不需要添加`${user}`这个前缀了。比如：ubuntu:14.04或者ubuntu。
 
@@ -53,7 +53,7 @@ Docker提供了一个很重要的run命令用来运行镜像。比如：
 docker run ubuntu
 ```
 
-这样就会去运行Ubuntu镜像了。注意：如果此时本地没有对应的镜像的话也会去下载镜像。也就是说你不必要先去下载镜像，然后才能运行。如果，基本上pull在我使用docker的过程中可能很少用到。每执行一次此命令就会创建一个容器(后面会将)，一个镜像可以运行多次从而会产生多个容器。
+这样就会去运行Ubuntu镜像了。注意：如果此时本地没有对应的镜像的话也会去下载镜像。也就是说你不必要先去下载镜像，然后才能运行。如果，基本上pull在我使用Docker的过程中可能很少用到。每执行一次此命令就会创建一个容器(后面会将)，一个镜像可以运行多次从而会产生多个容器。
 
 `run`其实还可以添加多个参数，下面列出了自己整理的部分
 
@@ -376,7 +376,7 @@ docker wait ${container}
 
 ## 导出/导入
 
-docker支持讲我们的镜像导出成文件，也可以从文件中导入镜像。
+Docker支持讲我们的镜像导出成文件，也可以从文件中导入镜像。
 
 下面来看看如何操作：
 
@@ -423,7 +423,7 @@ sudo docker load -i multi-al-ub-0
 
 #### export
 
-与save不同的是，docker只能用来将容器导出为镜像，注意，不是容器。任何的元数据，包括端口映射、CMD、ENTRYPOINT等全部都丢失。据说这个过程中也会丢失原镜像中的commit记录，从而导致文件会比save的方式要小一些。
+与save不同的是，Docker只能用来将容器导出为镜像，注意，不是容器。任何的元数据，包括端口映射、CMD、ENTRYPOINT等全部都丢失。据说这个过程中也会丢失原镜像中的commit记录，从而导致文件会比save的方式要小一些。
 
 ```shell
 docker export ${container} > ${file_name}
@@ -505,7 +505,7 @@ Login Succeeded
 
 然后打开<https://www.daocloud.io/mirror#accelerator-doc>，里面会自动显示出你专有的加速连接。执行它的脚本即可，比阿里云方便多了。
 
-最后，上一张docker lifecycle的图片:
+最后，上一张Docker lifecycle的图片:
 
 ![](https://media.licdn.com/mpr/mpr/shrinknp_800_800/AAEAAQAAAAAAAAS6AAAAJGE2NDg5M2RjLTcxYTQtNDlmYS04OGY5LWI3YmU0Y2UwNjAyZQ.png)
 

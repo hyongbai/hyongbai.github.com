@@ -230,7 +230,7 @@ FROM alpine:3.6
 ADD . app/
 RUN cd app/ && ls
 RUN ls
-➜  sudo docker build -f run/Dockerfile run
+➜  docker build -f run/Dockerfile run
 Sending build context to Docker daemon 2.048 kB
 Step 1 : FROM alpine:3.6
  ---> a084521541f8
@@ -307,7 +307,7 @@ RUN ["echo","HOME = $HOME"]
 RUN ["/bin/sh", "-c" , "echo HOME = $HOME"]
 
 # 运行结果
-➜  sudo docker build -f run/Dockerfile run
+➜  docker build -f run/Dockerfile run
 Sending build context to Docker daemon 2.048 kB
 Step 1 : FROM alpine:3.6
  ---> a084521541f8
@@ -363,12 +363,12 @@ docker run my-image /bin/bash -c "ls -l"
 
 ```shell
 # Dockerfile文件内容
-➜  dockerfile cat shell/df                                                         
+➜  cat shell/df                                                         
 FROM alpine:3.6
 CMD echo "HELLO FROM CMD"
 
 # 编译镜像
-➜  dockerfile sudo docker build -t hyongbai/dfshell -f shell/df .                                 
+➜  docker build -t hyongbai/dfshell -f shell/df .                                 
 Sending build context to Docker daemon 6.656 kB
 Step 1 : FROM alpine:3.6
  ---> a084521541f8
@@ -379,11 +379,11 @@ Removing intermediate container 273247f2596c
 Successfully built 405a157a781e
 
 # 不带command运行镜像
-➜  dockerfile sudo docker run hyongbai/dfshell                                     
+➜  docker run hyongbai/dfshell                                     
 HELLO FROM CMD
 
 # 带command运行镜像
-➜  dockerfile sudo docker run hyongbai/dfshell /bin/sh -c "echo \"hello from run\""  
+➜  docker run hyongbai/dfshell /bin/sh -c "echo \"hello from run\""  
 hello from run
 ```
 
@@ -395,7 +395,7 @@ hello from run
 
 ```shell
 # Dockerfile文件
-➜  dockerfile cat shell/df 
+➜  cat shell/df 
 FROM alpine:3.6
 RUN echo "HELLO FROM RUN"
 CMD echo "HELLO FROM CMD"
@@ -404,7 +404,7 @@ ENTRYPOINT echo "HELLO FROM ENTRYPOINT"
 ENTRYPOINT echo "HELLO FROM ENTRYPOINT2"
 
 # 编译镜像
-➜  dockerfile sudo docker build -t hyongbai/dfshell-multi -f shell/df .            
+➜  docker build -t hyongbai/dfshell-multi -f shell/df .            
 Sending build context to Docker daemon 6.656 kB
 Step 1 : FROM alpine:3.6
  ---> a084521541f8
@@ -432,11 +432,11 @@ Removing intermediate container 1f9b0579479a
 Successfully built 34b169a7f29e
 
 # 运行，不加外部命令
-➜  dockerfile sudo docker run hyongbai/dfshell-multi                  
+➜  docker run hyongbai/dfshell-multi                  
 HELLO FROM ENTRYPOINT2
 
 # 运行，加外部命令
-➜  dockerfile sudo docker run hyongbai/dfshell-multi /bin/sh -c "echo \"hello from run\""
+➜  docker run hyongbai/dfshell-multi /bin/sh -c "echo \"hello from run\""
 HELLO FROM ENTRYPOINT2
 ```
 
@@ -529,7 +529,7 @@ RUN ls -l /hello
 
 # 这个是在test-docker/目录运行。当前目录下面有一个文件叫做123
 
-➜  test-docker docker build .   
+➜  docker build .   
 Sending build context to Docker daemon 3.584 kB
 Step 1 : FROM alpine
  ---> a084521541f8
@@ -540,15 +540,14 @@ Step 3 : RUN ls -l /hello
  ---> Running in 566084a12c9a
 total 8
 -rw-r--r--    1 root     root            42 Aug 31 19:20 Dockerfile
--rw-r--r--    1 root     root             0 Aug 31 19:21 abc
-drwxr-xr-x    2 root     root          4096 Aug 31 19:21 app
+-rw-r--r--    1 root     root             0 Aug 31 19:21 123
  ---> 49a92dfe1497
 Removing intermediate container 566084a12c9a
 Successfully built 49a92dfe1497
 
 # 这个是创建了一个子文件夹app/, 并在其中创建文件123，并将Dockerfile放到子目录cmd/中
 
-➜  test-docker docker build -f app/cmd/Dockerfile app
+➜  docker build -f app/cmd/Dockerfile app
 Sending build context to Docker daemon 3.072 kB
 Step 1 : FROM alpine
  ---> a084521541f8
