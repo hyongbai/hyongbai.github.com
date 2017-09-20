@@ -89,20 +89,20 @@ sudo groupadd docker && sudo gpasswd -a $USER docker
 
 需要安装machine来管理电脑上面运行的Docker。一台电脑可以运行多Docker。
 
-MAC:
-
-虽然`Docker for mac`使用了HyperV虚拟机，但是创建docker-machine的时候还不支持HyperV，还是需要指定vb。如下：
-
-```shell
-docker-machine create --driver=virtualbox {name}
-```
-
 LINUX:
 
 因为Docker本身是运行在linux内核的，所以不存在driver这个概念。因此直接可以如下方式运行：
 
 ```shell
 docker-machine create {name}
+```
+
+MAC:
+
+虽然`Docker for mac`使用了HyperKit虚拟机，但是创建docker-machine的时候还不支持HyperKit，还是需要指定vb。如下：
+
+```shell
+docker-machine create --driver=virtualbox {name}
 ```
 
 WINDOWS:
@@ -140,14 +140,30 @@ Docker is up and running!
 To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env dev
 ```
 
+其实, 在linux或者安装了Docker for mac/windows无需create machine是可以直接运行docker的. 也就是说默认情况下在Mac(10.10+)上面安装了Docker for mac之后即使不安装Virtualbox也是没有问题的.
+
 #### 最后
 
 好了，执行成功之后输入：
 
+
 ```shell
-➜  ~ docker -v
-Docker version 1.12.3, build 6b644ec
-➜  ~ 
+➜  ~ docker version
+Client:
+ Version:      1.9.1
+ API version:  1.21
+ Go version:   go1.4.3
+ Git commit:   a34a1d5
+ Built:        Fri Nov 20 17:56:04 UTC 2015
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      1.9.1
+ API version:  1.21
+ Go version:   go1.4.3
+ Git commit:   a34a1d5
+ Built:        Fri Nov 20 17:56:04 UTC 2015
+ OS/Arch:      linux/amd64
 ```
 
 ## 参考
@@ -161,3 +177,5 @@ Docker version 1.12.3, build 6b644ec
 > <https://docs.docker.com/docker-for-mac/docker-toolbox/>
 >
 > <https://docs.docker.com/toolbox/toolbox_install_windows/>
+>
+> <http://usyiyi.cn/documents/docker/machine/get-started.html>
