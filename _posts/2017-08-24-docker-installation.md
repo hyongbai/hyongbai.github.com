@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Docker-安装"
-description: "Docker-安装"
+title: "Docker练手之安装"
+description: "Docker练手之安装"
 category: all-about-tech
 tags: [Docker]
 date: 2017-08-28 00:05:57+00:00
