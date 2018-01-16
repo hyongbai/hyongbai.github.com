@@ -11,6 +11,18 @@ date: 2017-02-24 11:59:00+00:00
  
 此处仅仅从来记录平时常用的命令的参数。以免下次忘记时及时找到。也方便更多的人。
 
+## sed
+
+```bash
+ll | sed '2!d' # show the 2nd line
+ll | sed '2d' # hide the 2nd line
+ll | sed -n '$p' # show the last one
+ll | sed -n '/aaa/,$p' # after aaa
+ll | sed -n '/aaa/,/bbb/p' # after aaa  before bbb
+echo abcabcdefghijk | sed -e 's#a#4#g' # 替换所有的a
+echo abcabcdefghijk | sed -e 's/a/4/1' # 1表示替换第一个
+```
+
 ## awk
 
 - $0 表示所有。
