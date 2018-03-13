@@ -26,7 +26,7 @@ final Object[] aO = aI;
 
 ## 类型擦除
 
-其实泛型是在编译器层面实现的，简单来说就是编译的时候编译器会将泛型给擦除，只留下RawType。比如：List\<String\>编译后会变成List。
+其实泛型是在编译器层面实现的，简单来说就是编译的时候编译器会将泛型给擦除，只留下RawType。比如：`List<String>`编译后会变成`List`。
 
 之所以会出现泛型擦除主要原因是泛型是Java1.5之后才出现的，也就是说我们之前写的代码是没法使用的。主要是兼容性方面的考虑，故而编译器编译的时候会进行泛型擦除。
 
@@ -53,7 +53,7 @@ List<? extends Number> list = new ArrayList<Long>();
 
 读取的时候，以上面代码为例，列表可以保证的是读取的数据类型一定是Number或者其子类。
 
-但是使用extend方式的通配符没法进行写入，因为没法知道list具体是什么类型。比如你想往里面add一个Number，但是list有可能是ArrayList<Integer>；如果你想往里面写入一个Integer的时候，list也有可能是ArrayList<Long>。所以使用extends的时候是没法往list里面写入的。
+但是使用extend方式的通配符没法进行写入，因为没法知道list具体是什么类型。比如你想往里面add一个Number，但是list有可能是`ArrayList<Integer>`；如果你想往里面写入一个Integer的时候，list也有可能是`ArrayList<Long>`。所以使用extends的时候是没法往list里面写入的。
 
 但是，在list初始化的时候可以直接引用另一个list。比如：
 ```java
@@ -79,13 +79,13 @@ integers.add(integer);
 
 ### 协变
 
-前面提到了协变，在Java中数据时支持协变的。对于数组而言，Number是Integer的父类，那么Number[]也是Integer[]的父类了。而泛型的出现就是为了让我们写代码的时候类型安全，如果List<Number>是List<Integer>的父类的话，我们编译器会运行我们往list里面添加一个Long，但是它需要的是Integer，故而就破坏了泛型的初衷：类型安全。所以默认泛型是不支持协变的。
+前面提到了协变，在Java中数据时支持协变的。对于数组而言，Number是Integer的父类，那么`Number[]`也是`Integer[]`的父类了。而泛型的出现就是为了让我们写代码的时候类型安全，如果`List<Number>`是`List<Integer>`的父类的话，我们编译器会运行我们往list里面添加一个Long，但是它需要的是Integer，故而就破坏了泛型的初衷：类型安全。所以默认泛型是不支持协变的。
 
 但是，使用通配符的时候泛型是支持协变的。比如:
 
 ```java
 final List<Number> numbers = new ArrayList<>();
-final List<? extends Object> list = integers;
+final List<? extends Object> list = numbers;
 ```
 原因是使用extends的时候，编译器要求list的泛型必须是Object的子类，故而Number可以支持。
 
@@ -203,7 +203,7 @@ Name = T
 
 数组类型。
 
-需要注意的是，只能是TypeVariable或者是ParameterizedType的数组才能称得上是数组类型, 比如String[]，List<String>都不是。
+需要注意的是，只能是TypeVariable或者是ParameterizedType的数组才能称得上是数组类型, 比如String[]，`List<String>`å都不是。
 
 - `Type getGenericComponentType();` 返回的是数组的类型。
 
