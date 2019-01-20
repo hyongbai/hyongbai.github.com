@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "解决空间不足的问题以及修改默认配置"
-description: "解决空间不足的问题以及修改默认配置"
+title: "Docker-解决空间不足的问题以及修改默认配置"
+description: "Docker-解决空间不足的问题以及修改默认配置"
 category: all-about-tech
 tags: -[Docker]
 date: 2019-01-20 12:05:57+00:00
