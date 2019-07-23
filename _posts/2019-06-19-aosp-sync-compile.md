@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "下载编译AOSP源码"
+title: "AOSP源码下载/浏览/编译/刷机"
 description: "sync compile aosp"
 category: all-about-tech
 tags: -[aosp]
@@ -40,7 +40,7 @@ repo sync -j4
             review="android-review.googlesource.com" />
 ```
 
-- 第一步：修改 `.repo/manifests.git/config` remote的url。如下:
+- 第二步：修改 `.repo/manifests.git/config` remote的url。如下:
 
 ```
 [core]
@@ -87,12 +87,25 @@ docker exec -it aospxref bash
 容器的安装路径在中：/opengrok/
 
 ```bash
-java -jar /opengrok/lib/opengrok.jar -P -S \
+java \
+ -jar /opengrok/lib/opengrok.jar \
+ -H -G  -P -S\
  -s /aosp/android-8.1.0_r60/art/ \
  -d /opengrok/data/ \
  -W /var/opengrok/etc/configuration.xml \
  --progress
 ```
+
+或者：
+
+```bash
+opengrok-indexer \
+ -a /opengrok/lib/opengrok.jar -- \
+ -H -P -S -G \
+ -s /aosp/android-8.1.0_r60/art \
+ -d /opengrok/data \
+ -W /var/opengrok/etc/configuration.xml
+ ```
 
 或者通过如下方式直接在容器中运行，而无需先进入容器中:
 
@@ -131,7 +144,7 @@ java -jar /opengrok/lib/opengrok.jar -P -S \
     made before indexing, needs -v, otherwise it just goes to the log)
 ```
 
-opengro官方镜像中tomcat的设置的文件路径为：
+opengrok官方镜像中tomcat的设置的文件路径为：
 
 ```
 /usr/local/tomcat/webapps/ROOT/WEB-INF/web.xml
@@ -170,6 +183,7 @@ bash
 source build/envsetup.sh && \
 # 设定需要启动的编译目标
 lunch ${arch:-aosp_arm-eng} && \
+# 4线程编译
 make -j4
 ```
 
@@ -224,6 +238,8 @@ adb disable-verity && sleep 0.3
 
 ## 编译Framework
 
+#### Android Studio调试环境
+
 ```sh
 # 载入aosp环境脚本
 source build/envsetup.sh && \
@@ -235,22 +251,75 @@ fas
 source development/tools/idegen/idegen.sh && ls android.*
 ```
 
+之后导入Android Studio即可。更详细的导入教程可以Google。
+
+#### 修改Framework编译Rom
+
+修改framework的代码，比如添加api等，需要更新framework的api列表(frameworks/base/api/current.txt)。
+
+方法如下:
+
+```
+******************************
+You have tried to change the API from what has been previously approved.
+
+To make these errors go away, you have two choices:
+   1) You can add "@hide" javadoc comments to the methods, etc. listed in the
+      errors above.
+
+   2) You can update current.txt by executing the following command:
+         make update-api
+
+      To submit the revised current.txt to the main Android repository,
+      you will need approval.
+******************************
+```
+
+更新api列表大概会花费5分钟。
+
 ## 烧录
 
 oem unlock 之后，重启手机到 bootloader 页面。
 
-- #### 方法一：
+刷机可以添加-w来清除数据。
 
-一步到位
+也可以通过如下方法清空cache和userdata:
 
 ```
-# w 表示是否清除数据
+fastboot erase cache
+fastboot erase userdata
+```
+
+#### 以下是无法进入系统解决方案：
+
+如果刷机之后无法boot的话，很有可能是编译出来的镜像(.img)文件没有先前安装的系统多，导致没有更新之前设备上的某些分区，举个例子：
+
+在pixel(sailfish)中刷入了官方的9.1的rom，之后又通过上面步骤刷入了自己编译的镜像文件。此时很有可能出现出现google标志后直接进入bootloader中。此时可以先刷入跟下载的aosp源码接近的官方包，再刷入自己编译的镜像即可。
+
+比如，我下载的源码是“8.1.0_r60”，使用的官方相近的包是“[sailfish-opm2.171019.029-factory-bee9592c](https://dl.google.com/dl/android/aosp/sailfish-opm2.171019.029-factory-bee9592c.zip)”
+
+很有可能是bootloader对应不上导致的。解开上面的官方镜像执行`./flash-base.sh`刷入其中的bootloader-sailfish-8996-012001-1711291800.img，而不用刷整个rom.
+
+#### 刷入aosp镜像有多种方式
+
+- #### 方法一：
+
+一步到位(推荐)
+
+```
+# -w 表示是否清除数据
 fastboot flashall -w
+```
+
+此时可能会要求设置ANDROID_PRODUCT_OUT(用于fastboot识别刷机镜像)。根据自己编译的设备填写，nexus5x如下:
+
+```
+export ANDROID_PRODUCT_OUT=${YOUR_WORK_DIR}/out/target/product/bullhead
 ```
 
 - #### 方法二：
 
-各个单刷
+各个单刷。
 
 ```sh
 $ cd <AOSP_TOP>/out/target/product/<product_name>/
@@ -265,23 +334,27 @@ $ fastboot reboot
 
 - #### 方法三
 
-创建系统镜像，比如pixel手机。代号sailfish
-
-生成:
-```
-source device/google/marlin/factory-images_sailfish/generate-factory-images-package.sh
-```
-
-- #### 方法四
+生成更新包：
 
 ```
 make updatepackage
 ```
 
+刷入更新包：
+
 ```
-fastboot update  <AOSP_TOP>/out/target/product/<product_name>/aosp_sailfish-img-eng.aosp.zip
+fastboot update  <AOSP_TOP>/out/target/product/<product_name>/aosp_<product_name>-img-eng.aosp.zip
 ```
 
+- #### 方法四
+
+创建工厂系统镜像。
+
+比如pixel手机，代号sailfish
+
+```
+source device/google/marlin/factory-images_sailfish/generate-factory-images-package.sh
+```
 
 ## 编译模块
 
@@ -295,6 +368,24 @@ mmm 编译指定目录
 比如：
 mmm packages/apps/Launcher3/
 ```
+
+#### 编译art虚拟机
+
+如果修改了art虚拟机，可以选择编译整个系统。也可以选择单独编译art模块。
+
+单独编译art模块有两种方法：
+
+- mmm art/runtime
+
+> 这种方法会编译art/runtime所有模块。
+
+- mmm art/runtime:libart
+
+> 这里只会编译libart相关的模块。速度较快。
+
+编译完成之后将libart推到system/lib(lib64)目录即可。
+
+编译产物在:/out/target/product/<product_name>/system/lib(lib64)
 
 ## LineageOS
 
@@ -333,6 +424,7 @@ export PATH=${JAVA_HOME}/bin:${PATH}
 ## 编译错误
 
 - #### 不支持当前 OSX 版本
+---
 
 ```sh
 ninja: no work to do.
@@ -364,11 +456,24 @@ nano build/soong/cc/config/x86_darwin_host.go
 # 找到 darwinSupportedSdkVersions 添加当前电脑支持的最接近的 sdk 即可。
 ```
 
+- #### ld: symbol(s) not found for architecture i386
 ---
 
-- #### JDK版本问题
+大概率是使用了10.14及之后的mac sdk导致的。因为此版本及之后取消了i386的支持。
 
-Android8.1上面只能使用Sun/OracleJDK！
+安装10.13及之前的版本。其实，也可以只安装Command_Line_Tools，比如“Command_Line_Tools_macOS_10.13_for_Xcode_9.4.1”。
+
+可以去<https://developer.apple.com/download/more/>进行下载适合自己系统的版本。
+
+相关问题：<https://stackoverflow.com/questions/55369365/android-aosp-build-failed-on-macos-10-14>
+
+这个跟上面可以归结为一个问题，我最终是将`x86_darwin_host.go`填加了10.13，并卸载了xcode使用command line tools。
+
+
+- #### JDK版本问题
+---
+
+Android8.1上面只能使用Sun/OracleJDK, 而Android9.0使用的是OpenJDK!
 
 ```
 10:28:57 *******************************************************
@@ -409,9 +514,8 @@ apt-get install oracle-java8-installer && \
 update-alternatives --config java
 ```
 
----
-
 - #### LineageOS bootanimation 编译失败
+---
 
 ```
 [1058/1068] including ./vendor/lineage/bootanimation/Android.mk ...
@@ -434,9 +538,8 @@ https://imagemagick.org/script/binary-releases.php
 brew install ImageMagick
 ```
 
----
-
 - #### curl 版本错误导致jack 启动失败
+---
 
 ```
 [  2% 1220/40672] Ensuring Jack server is installed and started
@@ -484,9 +587,8 @@ sudo make && sudo make install
 export PATH=/usr/local/curl/bin:$PATH
 ```
 
----
-
 - #### stat: cannot read file system information for ‘%z’: No such file or directory
+---
 
 原因：安装了`coreutils`导致使用了错误的 stat 版本。
 
@@ -506,6 +608,7 @@ chmod -x $(which stat)
 <https://stackoverflow.com/questions/28784392/building-aosp-on-mac-yosemite-and-xcode>
 
 - #### file not found
+---
 
 多半是在case insensetive的分区上面同步代码导致的。
 
@@ -530,11 +633,10 @@ frameworks/av/media/libstagefright/DataSource.cpp
 external/iptables/include/linux/netfilter/xt_DSCP.h
 ```
 
+- #### /external/selinux/checkpolicy:checkpolicy yacc policy_parse.y [darwin] FAILED:
 ---
 
 ninja: error: 'out/host/darwin-x86/framework/host-libprotobuf-java-nano.jar', needed by 'out/host/common/obj/JAVA_LIBRARIES/launcher_proto_lib_intermediates/classes-full-debug.jar', missing and no known rule to make it
-
-- #### /external/selinux/checkpolicy:checkpolicy yacc policy_parse.y [darwin] FAILED:
 
 > [  0% 391/82033] //external/selinux/checkpolicy:checkpolicy yacc policy_parse.y [darwin]
 > FAILED: out/soong/.intermediates/external/selinux/checkpolicy/checkpolicy/darwin_x86_64/gen/yacc/external/selinux/checkpolicy/policy_parse.c out/soong/.intermediates/external/selinux/checkpolicy/checkpolicy/darwin_x86_64/gen/yacc/external/selinux/checkpolicy/policy_parse.h
@@ -558,11 +660,45 @@ git pull "https://android.googlesource.com/platform/external/bison" refs/changes
 > - <https://alset0326.github.io/aosp-on-macos-high-sierra.html>
 > - <https://android-review.googlesource.com/c/platform/external/bison/+/517740>
 
+- #### art/runtime/thread.cc:1805: error: undefined reference to 'art::xxx(art::mirror::ClassLoader*)'
+---
+
+> clang.real: error: linker command failed with exit code 1 (use -v to see invocation)
+>
+> ninja: build stopped: subcommand failed.
+> 
+> 11:55:24 ninja failed with: exit status 1
+
+很大概率上是因为新建了文件，但是没有放到Android.bp对应的配置中间去。
+
+比如在art/runtime下修改代码没有更新到art/runtime/Android.bp的cc_defaults中。
+
 ## 其他
 
 aosp on OSX Docker编译非常之慢。不推荐使用Docker 上面编译。
 
 Windows 上面使用 Docker 编译可能会出现无法创建软链接的情况。
+
+编译aosp，不论是编译rom还是单个模块。每次都需要执行一系列的准备操作，比如编译并更新libart：
+
+```
+bash
+cd ${YOUR_WORK_DIR}
+source build/envsetup.sh
+lunch aosp_${YOUR_DEVICE}-userdebug
+mmm art/runtime:libart
+# 以下多个文件，如：lib/libart.so lib/libartd.so lib64/libart.so lib64/libartd.so
+adb push out/target/product/${YOUR_DEVICE}/system/lib/libart.so /system/lib/
+adb rebooot
+```
+
+需要很多耐心。如果将这些抽象成脚手架，不论何时何地都能直接运行，不美哉？比如简化成:
+
+![aosp-aospjet-example.png](http://j.mp/2LBbbiS)
+
+> 待开源。
+
+## 参考
 
 - <https://www.cnblogs.com/larack/p/9646860.html>
 - <https://wiki.lineageos.org/devices/bullhead/build>
