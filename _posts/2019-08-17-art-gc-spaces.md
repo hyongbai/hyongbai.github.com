@@ -51,9 +51,9 @@ Android Framework中通用的类都都是存储在这里的。
 // art/runtime/parsed_options.cc
 .Define("-XX:LargeObjectSpace=_")
   .WithType<gc::space::LargeObjectSpaceType>()
-  .WithValueMap({{"disabled", gc::space::LargeObjectSpaceType::kDisabled},
+  .WithValueMap({ {"disabled", gc::space::LargeObjectSpaceType::kDisabled},
                  {"freelist", gc::space::LargeObjectSpaceType::kFreeList},
-                 {"map",      gc::space::LargeObjectSpaceType::kMap}})
+                 {"map",      gc::space::LargeObjectSpaceType::kMap} })
   .IntoKey(M::LargeObjectSpace)
 ```
 
