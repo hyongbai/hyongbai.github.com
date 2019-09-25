@@ -71,12 +71,13 @@ https://zh.wikipedia.org/wiki/EFI系统分区
 ### bios
 
 - Load Optimized Defaults
-- `VT-d`: disable
-- `CFG-Lock`: disable
-- `Secure Boot Mode`: disable
-- `OS Type`: Other OS
-- `IO Serial Port`: disable
-- `XHCI Handoff`: Enabled
+- `System Time and Alarm Source Source`:Legacy rtc
+- ~~`VT-d`: disable~~
+- ~~`CFG-Lock`: disable~~
+- ~~`Secure Boot Mode`: disable~~
+- ~~`OS Type`: Other OS~~
+- ~~`IO Serial Port`: disable~~
+- ~~`XHCI Handoff`: Enabled~~
 - If you have a 6 series or x58 system with AWARD BIOS, disable USB 3.0
 
 Advances\SystemAgent(SA)\Graphics Configuration:
