@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Android硬件加速绘制时与软件加速的区别"
-description: "Android硬件加速绘制时与软件加速的区别"
+title: "Android绘制流程4：Android硬件加速与软件绘制区别"
+description: "Android绘制流程4：Android硬件加速与软件绘制区别"
 category: all-about-tech
 tags: -[android]
 date: 2020-03-06 23:03:57+00:00
