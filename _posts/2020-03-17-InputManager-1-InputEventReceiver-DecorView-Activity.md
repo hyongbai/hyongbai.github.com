@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Android输入事件0: 上下层通信"
-description: "Android输入事件0: 上下层通信"
+title: "Android输入事件1: 上下层通信"
+description: "Android输入事件1: 上下层通信"
 category: all-about-tech
 tags: -[aosp，art, android]
 date: 2020-03-17 21:03:57+00:00
