@@ -7,6 +7,9 @@ tags: -[aosp，art, android]
 date: 2020-03-16 23:03:57+00:00
 ---
 
+> 基于 android-8.1.0_r60
+>
+> 为求简洁，代码已删除大量细枝末节。
 
 ## 启动
 
@@ -992,7 +995,11 @@ void InputDispatcher::enqueueDispatchEntryLocked(
 }
 ```
 
-并且把EventEntry转换为DispatchEntry，同时加入到当前这个connection的队列outboundQueue中。这一步处理后就到来Server同Client的通信了。
+并且把EventEntry转换为DispatchEntry，同时加入到当前这个connection的outboundQueue中队列。这一步处理后就到来Server同Client的通信了。
+
+注意：上面针对`eventEntry->type`分别使用`connection->inputState.trackKey`和`connection->inputState.trackMotion`对当前的Event进行跟踪。
+
+如果当前的action为Cancel或者UP等，那么将不继续跟踪同时不加入到`connection的outboundQueue队列`。以为着这次传递之后，后续这个事件将从头开始，即非持续性事件(inconsistent event)。
 
 
 #### - startDispatchCycleLocked
