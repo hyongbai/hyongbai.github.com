@@ -376,13 +376,34 @@ public static void main(String argv[]) {
 }
 ```
 
-这里首先解析数据。。。关键是socketName/startSystemServer等等。
+这里首先解析数据。关键是socketName/startSystemServer等等。
+
+#### - registerServerSocket
 
 并且这里会通过registerServerSocket创建一个ServerSocket。用于接收AMS发送过来的Socket信息，从而fork新进程并启动App。
 
 - 如果是startSystemServer则进入创建SystemServer的逻辑。
 
 - 否则通过zygoteServer创建一个loop，不断接收来自Client的消息。
+
+#### - preload
+
+同时，其中的`preload()`函数则包含了一系列预加载的逻辑：
+
+- preloadClasses()
+- preloadResources()
+- nativePreloadAppProcessHALs()
+- preloadOpenGL()
+- preloadSharedLibraries()
+- preloadTextResources()
+
+其中`preloadClasses()`会去`/system/etc/preloaded-classes`文件读取其全部内容，并一一将其Class载入到内存当中。
+
+这样，在子进程被fork完之后，这些预加载的内容则可以直接被使用了。
+
+> [预加载类列表: frameworks/base/config/preloaded-classes](https://j.mp/2wpECyE)
+
+#### - MethodAndArgsCaller
 
 注意：不论是fork出system_server还是子进程。当前逻辑(这一个语句)都会同时运行在当前进程和其子进程。linux系统在fork之后，会根据父子进程返回不同的pid。
 
