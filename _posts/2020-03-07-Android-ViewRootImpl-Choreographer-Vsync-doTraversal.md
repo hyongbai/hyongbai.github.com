@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Android绘制流程5：VSYNC信号"
-description: "Android绘制流程5：VSYNC信号"
+title: "Android绘制流程7: VSYNC信号"
+description: "Android绘制流程7: VSYNC信号"
 category: all-about-tech
 tags: -[aosp，art, android]
 date: 2020-03-07 23:03:57+00:00
