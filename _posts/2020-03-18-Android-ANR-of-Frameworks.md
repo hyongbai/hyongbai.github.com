@@ -11,7 +11,6 @@ date: 2020-03-18 19:03:57+00:00
 >
 > 为求简洁，代码已删除大量细枝末节。
 
-
 ## AppErrors
 
 所有的ANR最终都会调用到AppErrors的appNotResponding中：
@@ -328,7 +327,8 @@ final void processNextBroadcast(boolean fromMsg) {
             if (mService.mProcessesReady && r.dispatchTime > 0) {
                 long now = SystemClock.uptimeMillis();
                 if ((numReceivers > 0) &&  (now > r.dispatchTime + (2*mTimeoutPeriod*numReceivers))) {
-                    ... // TIMEOUT
+                    // 如果当前的时间已超dispatchTime加上2倍receivers数目与mTimeoutPeriod的乘积，则标记为dispatch超时。
+                    // 其中dispatchTime为当前这个Intent第一次performRecive时标记。下面的代码会有。
                     broadcastTimeoutLocked(false); // forcibly finish this broadcast
                     forceReceive = true;
                     r.state = BroadcastRecord.IDLE;
@@ -355,10 +355,11 @@ final void processNextBroadcast(boolean fromMsg) {
                 continue;
             }
         } while (r == null);
-
+        // 当前Receiver在Intent已发送所有目标Receiver的位置。
         int recIdx = r.nextReceiver++;
         r.receiverTime = SystemClock.uptimeMillis();
         if (recIdx == 0) {
+        // 为0表示这个Receiver是这个Intent所分发对象的第一个，这里记录分发时间。
             r.dispatchTime = r.receiverTime;
             r.dispatchClockTime = System.currentTimeMillis();
         }
@@ -369,9 +370,11 @@ final void processNextBroadcast(boolean fromMsg) {
 
         final BroadcastOptions brOptions = r.options;
         final Object nextReceiver = r.receivers.get(recIdx);
-
+        
+        // 来自用户注册的广播
         if (nextReceiver instanceof BroadcastFilter) {
             BroadcastFilter filter = (BroadcastFilter)nextReceiver;
+            // 发送广播
             deliverToRegisteredReceiverLocked(r, filter, r.ordered, recIdx);
             ...
             return;
@@ -555,7 +558,7 @@ private final class AppNotResponding implements Runnable {
 
 ## Provider
 
-正常来说Provider是不存在ANR问题的（~~主要是我没找到~~），理论上来说provider是允许当前线程做耗时行为的（比如IO）。
+理论上来说provider是允许当前线程做耗时行为的（比如IO）。
 
 但是系统提供了另外一种检测provider的ANR的方法。
 
@@ -974,7 +977,7 @@ public boolean inputDispatchingTimedOut(final ProcessRecord proc,
 ## 总结
 
 - `SERVICE_TIMEOUT`为前台Service超时时间: 20秒
-- `SERVICE_BACKGROUND_TIMEOUT`为后台Service超时时间: 10个SERVICE_TIMEOUT为200秒
+- `SERVICE_BACKGROUND_TIMEOUT`为后台Service超时时间: 10个SERVICE_TIMEOUT为200秒。
 - `BROADCAST_FG_TIMEOUT` 前台广播超时时间: 10秒
 - `BROADCAST_BG_TIMEOUT` 后台广播超时时间: 60秒
-- `KEY_DISPATCHING_TIMEOUT`或者`DEFAULT_INPUT_DISPATCHING_TIMEOUT` 输入事件的超时时间为: 5秒
+- `KEY_DISPATCHING_TIMEOUT`或者`DEFAULT_INPUT_DISPATCHING_TIMEOUT` 输入事件的超时时间为: 5秒。
