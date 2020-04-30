@@ -125,7 +125,18 @@ bumpServiceExecutingLocked
 
 ### # bumpServiceExecutingLocked
 
-这个函数会被很多地方调用。每个调用的地方都对应着Service的一个生命周期:
+这个函数会被很多地方调用，分别是如下函数：
+
+```java
+// frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+requestServiceBindingLocked(ServiceRecord, IntentBindRecord, boolean, boolean)
+realStartServiceLocked(ServiceRecord, ProcessRecord, boolean)
+sendServiceArgsLocked(ServiceRecord, boolean, boolean)
+bringDownServiceLocked(ServiceRecord)
+removeConnectionLocked(ConnectionRecord, ProcessRecord, ActivityRecord)
+```
+
+每个调用的地方都对应着Service的一个生命周期。
 
 ```java
 // frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
@@ -136,16 +147,19 @@ private final void bumpServiceExecutingLocked(ServiceRecord r, boolean fg, Strin
         r.executeFg = fg;
         ServiceState stracker = r.getTracker();
         if (stracker != null) {
+            // 记录执行状态以及执行时间等等
             stracker.setExecuting(true, mAm.mProcessStats.getMemFactorLocked(), now);
         }
         if (r.app != null) {
             r.app.executingServices.add(r);
             r.app.execServicesFg |= fg;
             if (r.app.executingServices.size() == 1) {
+                // handler发送一个超时消息，监控是否ANR
                 scheduleServiceTimeoutLocked(r.app);
             }
         }
     } else if (r.app != null && fg && !r.app.execServicesFg) {
+        // handler发送一个超时消息，监控是否ANR
         r.app.execServicesFg = true;
         scheduleServiceTimeoutLocked(r.app);
     }
@@ -173,9 +187,11 @@ void scheduleServiceTimeoutLocked(ProcessRecord proc) {
     if (proc.executingServices.size() == 0 || proc.thread == null) {
         return;
     }
+    // 创建SERVICE_TIMEOUT_MSG类型的Message。
     Message msg = mAm.mHandler.obtainMessage(
             ActivityManagerService.SERVICE_TIMEOUT_MSG);
     msg.obj = proc;
+    // 发送超时任务。
     mAm.mHandler.sendMessageDelayed(msg,
             proc.execServicesFg ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
 }
@@ -208,12 +224,15 @@ void serviceTimeout(ProcessRecord proc) {
             return;
         }
         final long now = SystemClock.uptimeMillis();
+        // 根据当前时间，以及是否前台service。往前推最早的启动时间。
         final long maxTime =  now -
                 (proc.execServicesFg ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
         ServiceRecord timeout = null;
         long nextTime = 0;
         for (int i=proc.executingServices.size()-1; i>=0; i--) {
             ServiceRecord sr = proc.executingServices.valueAt(i);
+            // 找到比非超时时间还要早的启动的Service，换句话来说比maxTime要小，
+            // 说明到达现在的时间一定是超过了TIMEOUT的设定了。
             if (sr.executingStart < maxTime) {
                 timeout = sr;
                 break;
@@ -222,8 +241,10 @@ void serviceTimeout(ProcessRecord proc) {
                 nextTime = sr.executingStart;
             }
         }
+
+        // 如果找到了超时的ServiceRecord，并且对应进程还存活。
+        // 那么就可以向AMS发送了一个超时消息。
         if (timeout != null && mAm.mLruProcesses.contains(proc)) {
-            Slog.w(TAG, "Timeout executing service: " + timeout);
             // ...
             anrMessage = "executing service " + timeout.shortName;
         } else {
@@ -248,7 +269,7 @@ void serviceTimeout(ProcessRecord proc) {
 
 ## Broadcast
 
-发送广播最终会走到ActivityManagerService的`broadcasatIntentLocker`函数中，最后通过Intent找到相应的BroadcastRecord将其加入到BroadcastQueue之后，调用`scheduleBroadcastsLocked()`发送一个处理广播的Message。
+发送广播最终会走到ActivityManagerService的`broadcasatIntentLocker`函数中，最后通过Intent找到相应的BroadcastRecord将其加入到`BroadcastQueue`之后，调用`scheduleBroadcastsLocked()`发送一个处理广播的Message。
 
 ```java
 // frameworks/base/services/core/java/com/android/server/am/BroadcastQueue.java
@@ -278,11 +299,11 @@ private final class BroadcastHandler extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case BROADCAST_INTENT_MSG: {
-                if (DEBUG_BROADCAST) Slog.v(
-                        TAG_BROADCAST, "Received BROADCAST_INTENT_MSG");
+                // 处理广播的消息。
                 processNextBroadcast(true);
             } break;
             case BROADCAST_TIMEOUT_MSG: {
+                // 监控广播超时的消息
                 synchronized (mService) {
                     broadcastTimeoutLocked(true);
                 }
@@ -314,7 +335,7 @@ final void processNextBroadcast(boolean fromMsg) {
         if (fromMsg) {
             mBroadcastsScheduled = false;
         }
-        ... // sticky broadcast
+        ... // 省略粘性广播
         boolean looped = false;
         do {
             if (mOrderedBroadcasts.size() == 0) {
@@ -337,65 +358,55 @@ final void processNextBroadcast(boolean fromMsg) {
             if (r.state != BroadcastRecord.IDLE) {
                 return;
             }
-            if (r.receivers == null || r.nextReceiver >= numReceivers
-                    || r.resultAbort || forceReceive) {
-                if (r.resultTo != null) {
-                    try {
-                        performReceiveLocked(r.callerApp, r.resultTo,
-                            new Intent(r.intent), r.resultCode,
-                            r.resultData, r.resultExtras, false, false, r.userId);
-                        r.resultTo = null;
-                    }
-                }
-                cancelBroadcastTimeoutLocked();
-                ...
-                mOrderedBroadcasts.remove(0);
-                r = null;
-                looped = true;
-                continue;
-            }
+            ...
         } while (r == null);
         // 当前Receiver在Intent已发送所有目标Receiver的位置。
         int recIdx = r.nextReceiver++;
+        // 记录广播发送之前的时间戳
         r.receiverTime = SystemClock.uptimeMillis();
         if (recIdx == 0) {
-        // 为0表示这个Receiver是这个Intent所分发对象的第一个，这里记录分发时间。
+            // 为0表示这个Receiver是这个Intent所分发对象的第一个，这里记录分发时间。
             r.dispatchTime = r.receiverTime;
             r.dispatchClockTime = System.currentTimeMillis();
         }
         if (! mPendingBroadcastTimeoutMessage) {
+            // 计算超时时间，并向Handler发送一个TimeOut的消息。
             long timeoutTime = r.receiverTime + mTimeoutPeriod;
             setBroadcastTimeoutLocked(timeoutTime);
         }
 
         final BroadcastOptions brOptions = r.options;
         final Object nextReceiver = r.receivers.get(recIdx);
-        
+
         // 来自用户注册的广播
         if (nextReceiver instanceof BroadcastFilter) {
+            // 广播
             BroadcastFilter filter = (BroadcastFilter)nextReceiver;
-            // 发送广播
+            // 最后`performReceiveLocked`函数发送广播，执行scheduleRegisteredReceiver
             deliverToRegisteredReceiverLocked(r, filter, r.ordered, recIdx);
             ...
             return;
         }
-        // Hard case: need to instantiate the receiver, possibly starting its application process to host it.
         ...
     }
 }
 ```
 
-每次只会处理一个Receiver，下一次就等待`scheduleBroadcastsLocked()`发送的`BROADCAST_INTENT_MSG`消息(或者其他地方调用...)。
+每次只会处理一个Receiver，下一次就等待`scheduleBroadcastsLocked()`发送的`BROADCAST_INTENT_MSG`消息(或者其他地方调用)。
+
+广播其实是一个性能十分差的架构。
 
 这里主要是两部分逻辑：
 
 #### - dispatch超时
 
-while循环中：如果当前的时间已超dispatchTime加上2倍receivers数目与mTimeoutPeriod的乘积，则标记为超时。
+获取下一个BoradcastRecored的while循环中，如果当前时间(即上面代码的now)已超过 `dispatchTime + `2倍receivers数目与mTimeoutPeriod的乘积`，则标记为dispatch超时。
 
-其中dispatchTime为当前这个Intent第一次performRecive时标记。下面的代码会有。
+其中dispatchTime为当前这个Intent第一次performRecive时标记。即dispatchTime只会在index(r.nextReceiver)为0时才会设置上面注释有。
 
-这里如果超时则直接跳过Handler调用`broadcastTimeoutLocked(false)`。注意，这里的参数为false，意为不用再通过`receiverTime`计算是否超时。因为已经**dispatch超时**。
+这里如果满足dispatch超时，则跳过Handler直接调用`broadcastTimeoutLocked(false)`。
+
+注意，这里的参数为false，意为不用再通过`receiverTime`计算是否超时，因为已经**dispatch超时**。
 
 mTimeoutPeriod为AMS实例化BroadcastQueque时传递过来，具体值为：
 
@@ -410,11 +421,13 @@ static final int BROADCAST_BG_TIMEOUT = 60*1000;
 - BROADCAST_FG_TIMEOUT 前台广播 10秒
 - BROADCAST_BG_TIMEOUT 后台广播 60秒
 
-#### - 单条消息超时
+#### - 单条广播执行超时
 
-其中`deliverToRegisteredReceiverLocked`会performReceiveLock即告知客户端发送广播。
+发送广播之前会记录receiverTime，即准备往这个Receiver发送消息时的时间戳。
 
-在这之前会记录receiverTime，这个时间往每个Receiver发送消息都会记录。而dispatchTime只会在index为0时才会设置。也就是说receiverTime相对于Receiver而言，用户记录Reciver发送消息的时间；dispatchTime相对于整条广播消息而言(一条广播包含多个Receiver)，记录的是消息初次被处理时的时间。
+同时调用setBroadcastTimeoutLocked监控超时。
+
+也就是说receiverTime相对于Receiver而言，用户记录Reciver发送消息的时间；dispatchTime相对于整条广播消息而言(一条广播包含多个Receiver)，记录的是消息初次被处理时的时间。
 
 向BroadcastHandler发送BROADCAST_TIMEOUT_MSG的Message是下面这一句：
 
@@ -488,7 +501,6 @@ final void broadcastTimeoutLocked(boolean fromMsg) {
     } else {
         curReceiver = r.curReceiver;
     }
-    Slog.w(TAG, "Receiver during timeout of " + r + " : " + curReceiver);
     logBroadcastReceiverDiscardLocked(r);
     if (curReceiver != null && curReceiver instanceof BroadcastFilter) {
         BroadcastFilter bf = (BroadcastFilter)curReceiver;
@@ -517,8 +529,7 @@ final void broadcastTimeoutLocked(boolean fromMsg) {
     scheduleBroadcastsLocked();
 
     if (anrMessage != null) {
-        // Post the ANR to the handler since we do not want to process ANRs while
-        // potentially holding our lock.
+        // 发送ANR消息。
         mHandler.post(new AppNotResponding(app, anrMessage));
     }
 }
