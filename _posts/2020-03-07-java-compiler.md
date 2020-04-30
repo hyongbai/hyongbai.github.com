@@ -1,3 +1,12 @@
+---
+layout: post
+title: "Java编译器的调试以及实现逻辑"
+description: "Java编译器的调试以及实现逻辑"
+category: all-about-tech
+tags: -[java, javac, compiler]
+date: 2020-03-07 21:03:57+00:00
+---
+
 ## 源码
 
 本地的javac版本为1.8.0_45

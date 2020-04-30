@@ -4,7 +4,7 @@ title: "DisplayManagerService概述"
 description: "DisplayManagerService概述"
 category: all-about-tech
 tags: -[aosp，art, android]
-date: 2020-04-0921:03:57+00:00
+date: 2020-04-09 21:03:57+00:00
 ---
 
 > 基于 android-8.1.0_r60
