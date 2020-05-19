@@ -7,8 +7,6 @@ tags: -[aosp，art, android]
 date: 2020-04-02 23:03:57+00:00
 ---
 
-> 基于android-8.1.0_r60
-
 ## ViewRootImpl
 
 ```java
@@ -56,21 +54,15 @@ private void draw(boolean fullRedrawNeeded) {
 // frameworks/base/core/java/android/view/ViewRootImpl.java
 private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int xoff, int yoff,
         boolean scalingRequired, Rect dirty) {
-
     // Draw with software renderer.
     final Canvas canvas;
     try {
-        ...
         canvas = mSurface.lockCanvas(dirty);
-        ...
     }
     ...
-
     try {
-        ...
-            mView.draw(canvas);
-            drawAccessibilityFocusedDrawableIfNeeded(canvas);
-        ...
+        mView.draw(canvas);
+        drawAccessibilityFocusedDrawableIfNeeded(canvas);
     }
     ...
     return true;
@@ -148,7 +140,7 @@ void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
         // ViewRootImpl#attachRenderNodeAnimator will go directly to us.
         attachInfo.mPendingAnimatingRenderNodes = null;
     }
-    
+
     // 通知OpenGLPipeline进行硬件绘制
     final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
     int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
@@ -195,7 +187,15 @@ private void updateRootDisplayList(View view, DrawCallbacks callbacks) {
             mRootNode.end(canvas);
         }
     }
-    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+}
+
+private void updateViewTreeDisplayList(View view) {
+    view.mPrivateFlags |= View.PFLAG_DRAWN;
+    view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
+            == View.PFLAG_INVALIDATED;
+    view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
+    view.updateDisplayListIfDirty();
+    view.mRecreateDisplayList = false;
 }
 ```
 
@@ -208,7 +208,6 @@ private void updateRootDisplayList(View view, DrawCallbacks callbacks) {
 public RenderNode updateDisplayListIfDirty() {
     final RenderNode renderNode = mRenderNode;
     if (!canHaveDisplayList()) {
-        // can't populate RenderNode, don't try
         return renderNode;
     }
 
@@ -217,19 +216,14 @@ public RenderNode updateDisplayListIfDirty() {
     if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
             || !renderNode.isValid()
             || (mRecreateDisplayList)) {
-        // Don't need to recreate the display list, just need to tell our
-        // children to restore/recreate theirs
         if (renderNode.isValid()
                 && !mRecreateDisplayList) {
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
             dispatchGetDisplayList();
-
             return renderNode; // no work needed
         }
 
-        // If we got here, we're recreating it. Mark it as such to ensure that
-        // we copy in child display lists into ours in drawChild()
         // 除非手动将LAYER_TYPE改成SOFT，或者`PFLAG_INVALIDATED`被清除，`mRecreateDisplayList`将重新变为false。
         mRecreateDisplayList = true;
 
@@ -254,8 +248,6 @@ public RenderNode updateDisplayListIfDirty() {
                 canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-
-                // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                     dispatchDraw(canvas);
                     drawAutofilledHighlight(canvas);
@@ -305,7 +297,6 @@ public RenderNode updateDisplayListIfDirty() {
 下面就看看ViewGroup是如何分配ChildView进行绘制的。即软件绘制和硬件绘制都会调用到的`View.draw()`函数。
 
 ## View
-
 
 ```java
 // frameworks/base/core/java/android/view/View.java
@@ -384,7 +375,7 @@ public void draw(Canvas canvas) {
 
 绘制前景。
 
-- 其他信息:             
+- 其他信息:
 
 debugDrawFocus:绘制debug信息；drawDefaultFocusHighlight:绘制高亮焦点等；
 
@@ -858,7 +849,7 @@ private void buildDrawingCacheImpl(boolean autoScale) {
 
     boolean clear = true;
     Bitmap bitmap = autoScale ? mDrawingCache : mUnscaledDrawingCache;
-    
+
     // 创建Bitmap对象。并绘制先前绘制的缓存对象，即`mDrawingCache`。
     if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
         Bitmap.Config quality;
