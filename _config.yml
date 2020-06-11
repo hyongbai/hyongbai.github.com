@@ -11,8 +11,8 @@ timezone: Asia/Shanghai
 # ---------------- #
 #      social      #
 # ---------------- #
-name: Hyongbai(Ram Han)
-author: Hyongbai(Ram Han)
+name: Hyongbai(Riam Han)
+author: Hyongbai(Riam Han)
 email: hyongbai@gmail.com
 duoshuo: yourbay
 baidu: 3234957
@@ -36,7 +36,7 @@ highlighter: rouge
 kramdown:
   input: GFM
   syntax_highlighter: rouge
-plugins: 
+plugins:
   - jekyll-paginate
   - rouge
 
